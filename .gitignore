@@ -1,0 +1,9 @@
+*~
+.#*
+._*
+.env
+.git
+.DS_Store
+
+/data/
+/mtgdb
