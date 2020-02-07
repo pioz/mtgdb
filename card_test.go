@@ -1,17 +1,17 @@
-package importer_test
+package mtgdb_test
 
 import (
 	"testing"
 
-	"github.com/pioz/mtgdb/importer"
+	"github.com/pioz/mtgdb"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCardIsValid(t *testing.T) {
-	card := importer.Card{}
+	card := mtgdb.Card{}
 	assert.False(t, card.IsValid())
 
-	card = importer.Card{
+	card = mtgdb.Card{
 		EnName:          "Gilded Goose",
 		SetCode:         "eld",
 		CollectorNumber: "160",
@@ -21,9 +21,9 @@ func TestCardIsValid(t *testing.T) {
 }
 
 func TestCardImagePath(t *testing.T) {
-	card := importer.Card{
+	card := mtgdb.Card{
 		EnName:          "Gilded Goose",
-		SetCode:         "peld",
+		SetCode:         "PELD",
 		CollectorNumber: "160",
 		IconName:        "eld",
 	}
@@ -31,7 +31,7 @@ func TestCardImagePath(t *testing.T) {
 }
 
 func TestCardSetIconPath(t *testing.T) {
-	card := importer.Card{
+	card := mtgdb.Card{
 		EnName:          "Gilded Goose",
 		SetCode:         "peld",
 		CollectorNumber: "160",
@@ -41,7 +41,7 @@ func TestCardSetIconPath(t *testing.T) {
 }
 
 func TestCardSetName(t *testing.T) {
-	card := importer.Card{}
+	card := mtgdb.Card{}
 	card.SetName("Goose", "it")
 	assert.Empty(t, card.EnName)
 	assert.Equal(t, "Goose", card.ItName)

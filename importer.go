@@ -1,4 +1,4 @@
-package importer
+package mtgdb
 
 import (
 	"bytes"

@@ -6,16 +6,16 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/pioz/mtgdb/importer"
+	"github.com/pioz/mtgdb"
 )
 
 func main() {
 	log.Println("Importer initialization")
-	imp := importer.NewImporter("./data")
-	// imp.OnlyTheseSetCodes = []string{"eld"}
-	// imp.DownloadAssets = false
+	importer := mtgdb.NewImporter("./data")
+	// importer.OnlyTheseSetCodes = []string{"eld"}
+	// importer.DownloadAssets = false
 	log.Println("Downloading data")
-	err := imp.DownloadData()
+	err := importer.DownloadData()
 	if err != nil {
 		panic(err)
 	}
@@ -26,13 +26,13 @@ func main() {
 		panic("Failed to connect database")
 	}
 	log.Println("Database migration")
-	db.AutoMigrate(&importer.Card{})
-	db.Model(&importer.Card{}).AddUniqueIndex("idx_cards_set_code_collector_number", "set_code", "collector_number", "is_token")
+	db.AutoMigrate(&mtgdb.Card{})
+	db.Model(&mtgdb.Card{}).AddUniqueIndex("idx_cards_set_code_collector_number", "set_code", "collector_number", "is_token")
 
 	log.Println("Filling database")
 	start := time.Now()
-	collection := imp.BuildCardsFromJson()
-	err = importer.BulkInsert(db, collection, 1000)
+	collection := importer.BuildCardsFromJson()
+	err = mtgdb.BulkInsert(db, collection, 1000)
 	if err != nil {
 		log.Println(err)
 	}

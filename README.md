@@ -31,7 +31,7 @@ scryfall_id
 ```
 git clone github.com/pioz/mtgdb
 cd mtgdb
-go build -o mtgdb main.go
+go build -o mtgdb ./bin/main.go
 ./mtgdb
 ```
 

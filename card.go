@@ -1,8 +1,9 @@
-package importer
+package mtgdb
 
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 )
 
 type Card struct {
@@ -30,11 +31,11 @@ func (card *Card) IsValid() bool {
 }
 
 func (card *Card) ImagePath(dataImagesPath string) string {
-	return filepath.Join(dataImagesPath, "cards", card.SetCode, fmt.Sprintf("%s_%s.jpg", card.SetCode, card.CollectorNumber))
+	return filepath.Join(dataImagesPath, "cards", strings.ToLower(card.SetCode), fmt.Sprintf("%s_%s.jpg", strings.ToLower(card.SetCode), strings.ToLower(card.CollectorNumber)))
 }
 
 func (card *Card) SetIconPath(dataImagesPath string) string {
-	return filepath.Join(dataImagesPath, "sets", fmt.Sprintf("%s.jpg", card.IconName))
+	return filepath.Join(dataImagesPath, "sets", fmt.Sprintf("%s.jpg", strings.ToLower(card.IconName)))
 }
 
 func (card *Card) SetName(name, language string) {

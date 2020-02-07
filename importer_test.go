@@ -1,4 +1,4 @@
-package importer_test
+package mtgdb_test
 
 import (
 	"os"
@@ -6,21 +6,21 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/pioz/mtgdb/importer"
+	"github.com/pioz/mtgdb"
 	"github.com/stretchr/testify/assert"
 )
 
-const FIXTURES_PATH = "../fixtures"
+const FIXTURES_PATH = "./fixtures"
 
 func TestImport(t *testing.T) {
 	defer os.RemoveAll("/tmp/mtgscan_test")
 
-	imp := importer.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
-	imp.DownloadAssets = true
-	imp.SetIconsPath = "/tmp/mtgscan_test/images/sets"
-	imp.CardImagesPath = "/tmp/mtgscan_test/images/cards"
+	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
+	importer.DownloadAssets = true
+	importer.SetIconsPath = "/tmp/mtgscan_test/images/sets"
+	importer.CardImagesPath = "/tmp/mtgscan_test/images/cards"
 
-	collection := imp.BuildCardsFromJson()
+	collection := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
