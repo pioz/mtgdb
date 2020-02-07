@@ -1,5 +1,10 @@
 package importer
 
+import (
+	"fmt"
+	"path/filepath"
+)
+
 type Card struct {
 	EnName          string `gorm:"not null"`
 	EsName          string
@@ -22,6 +27,14 @@ type Card struct {
 
 func (card *Card) IsValid() bool {
 	return card.EnName != "" && card.SetCode != "" && card.CollectorNumber != "" && card.IconName != ""
+}
+
+func (card *Card) ImagePath(dataImagesPath string) string {
+	return filepath.Join(dataImagesPath, "cards", card.SetCode, fmt.Sprintf("%s_%s.jpg", card.SetCode, card.CollectorNumber))
+}
+
+func (card *Card) SetIconPath(dataImagesPath string) string {
+	return filepath.Join(dataImagesPath, "sets", fmt.Sprintf("%s.jpg", card.IconName))
 }
 
 func (card *Card) SetName(name, language string) {

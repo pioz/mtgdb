@@ -20,6 +20,26 @@ func TestCardIsValid(t *testing.T) {
 	assert.True(t, card.IsValid())
 }
 
+func TestCardImagePath(t *testing.T) {
+	card := importer.Card{
+		EnName:          "Gilded Goose",
+		SetCode:         "peld",
+		CollectorNumber: "160",
+		IconName:        "eld",
+	}
+	assert.Equal(t, "images/cards/peld/peld_160.jpg", card.ImagePath("./images"))
+}
+
+func TestCardSetIconPath(t *testing.T) {
+	card := importer.Card{
+		EnName:          "Gilded Goose",
+		SetCode:         "peld",
+		CollectorNumber: "160",
+		IconName:        "eld",
+	}
+	assert.Equal(t, "images/sets/eld.jpg", card.SetIconPath("./images"))
+}
+
 func TestCardSetName(t *testing.T) {
 	card := importer.Card{}
 	card.SetName("Goose", "it")
