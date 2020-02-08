@@ -28,6 +28,7 @@ func main() {
 	log.Println("Database migration")
 	db.AutoMigrate(&mtgdb.Card{})
 	db.Model(&mtgdb.Card{}).AddUniqueIndex("idx_cards_set_code_collector_number", "set_code", "collector_number", "is_token")
+	db.Model(&mtgdb.Card{}).AddIndex("idx_cards_en_name_released_at", "en_name", "released_at")
 
 	log.Println("Filling database")
 	start := time.Now()

@@ -1,5 +1,7 @@
 package mtgdb
 
+import "time"
+
 type Card struct {
 	EnName          string `gorm:"not null"`
 	EsName          string
@@ -15,6 +17,7 @@ type Card struct {
 	SetCode         string `gorm:"not null"`
 	CollectorNumber string `gorm:"not null"`
 	IsToken         bool   `gorm:"not null"`
+	ReleasedAt      *time.Time
 	IconName        string `gorm:"not null"`
 	ScryfallId      string
 	ExternalId      string

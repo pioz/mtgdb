@@ -192,6 +192,7 @@ type cardJsonStruct struct {
 	Name            string               `json:"name"`
 	PrintedName     string               `json:"printed_name"`
 	Lang            string               `json:"lang"`
+	ReleasedAt      string               `json:"released_at"`
 	ImageUris       imagesCardJsonStruct `json:"image_uris"`
 	CardFaces       []cardFaceStruct     `json:"card_faces"`
 	SetCode         string               `json:"set"`
@@ -243,6 +244,10 @@ func (importer *Importer) buildCardAndDownloadCardImage(collection map[string]*C
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
 			IconName:        iconName,
+		}
+		releasedAt, err := time.Parse("2006-01-02", cardJson.ReleasedAt)
+		if err == nil {
+			card.ReleasedAt = &releasedAt
 		}
 		collection[key] = card
 		if importer.DownloadAssets {
