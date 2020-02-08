@@ -1,11 +1,5 @@
 package mtgdb
 
-import (
-	"fmt"
-	"path/filepath"
-	"strings"
-)
-
 type Card struct {
 	EnName          string `gorm:"not null"`
 	EsName          string
@@ -31,11 +25,11 @@ func (card *Card) IsValid() bool {
 }
 
 func (card *Card) ImagePath(dataImagesPath string) string {
-	return filepath.Join(dataImagesPath, "cards", strings.ToLower(card.SetCode), fmt.Sprintf("%s_%s.jpg", strings.ToLower(card.SetCode), strings.ToLower(card.CollectorNumber)))
+	return CardImagePath(dataImagesPath, card.SetCode, card.CollectorNumber)
 }
 
 func (card *Card) SetIconPath(dataImagesPath string) string {
-	return filepath.Join(dataImagesPath, "sets", fmt.Sprintf("%s.jpg", strings.ToLower(card.IconName)))
+	return SetIconPath(dataImagesPath, card.IconName)
 }
 
 func (card *Card) SetName(name, language string) {

@@ -23,9 +23,8 @@ import (
 )
 
 type Importer struct {
-	DataPath            string
-	SetIconsPath        string
-	CardImagesPath      string
+	DataDir             string
+	ImagesDir           string
 	OnlyTheseSetCodes   []string
 	ForceDownloadData   bool
 	DownloadAssets      bool
@@ -37,12 +36,11 @@ type Importer struct {
 	bar                 *pb.ProgressBar
 }
 
-func NewImporter(dataPath string) *Importer {
+func NewImporter(dataDir string) *Importer {
 	return &Importer{
-		DataPath:            dataPath,
+		DataDir:             dataDir,
 		OnlyTheseSetCodes:   []string{},
-		SetIconsPath:        filepath.Join(dataPath, "images", "sets"),
-		CardImagesPath:      filepath.Join(dataPath, "images", "cards"),
+		ImagesDir:           filepath.Join(dataDir, "images"),
 		ForceDownloadData:   false,
 		DownloadAssets:      true,
 		ForceDownloadAssets: false,
@@ -52,10 +50,10 @@ func NewImporter(dataPath string) *Importer {
 }
 
 func (importer *Importer) DownloadData() error {
-	createDirIfNotExist(importer.DataPath)
+	createDirIfNotExist(importer.DataDir)
 
-	allSetsJsonFilePath := filepath.Join(importer.DataPath, "all_sets.json")
-	allCardsJsonFilePath := filepath.Join(importer.DataPath, "all_cards.json")
+	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
+	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
 	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
 		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
@@ -72,13 +70,13 @@ func (importer *Importer) DownloadData() error {
 }
 
 func (importer *Importer) BuildCardsFromJson() []Card {
-	defer removeAllFilesByExtension(importer.SetIconsPath, "svg")
+	defer removeAllFilesByExtension(SetIconsDir(importer.ImagesDir), "svg")
 	if importer.DownloadAssets {
-		createDirIfNotExist(importer.SetIconsPath)
+		createDirIfNotExist(SetIconsDir(importer.ImagesDir))
 	}
 
 	setsJson := setsJsonStruct{}
-	err := loadFile(filepath.Join(importer.DataPath, "all_sets.json"), &setsJson)
+	err := loadFile(filepath.Join(importer.DataDir, "all_sets.json"), &setsJson)
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +84,7 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	setCodeToIconNameMap := importer.getIconNamesAndDownloadSetIcons(&setsJson)
 
 	allCardsJson := make([]cardJsonStruct, 0, 60000)
-	err = loadFile(filepath.Join(importer.DataPath, "all_cards.json"), &allCardsJson)
+	err = loadFile(filepath.Join(importer.DataDir, "all_cards.json"), &allCardsJson)
 	if err != nil {
 		panic(err)
 	}
@@ -202,7 +200,7 @@ type cardJsonStruct struct {
 }
 
 type imagesCardJsonStruct struct {
-	Large string `json:"large"`
+	Png string `json:"png"`
 }
 
 type cardFaceStruct struct {
@@ -219,7 +217,7 @@ func (importer *Importer) getIconNamesAndDownloadSetIcons(setsJson *setsJsonStru
 		iconName := setJson.getIconName()
 		setCodeToIconNameMap[setJson.Code] = iconName
 		if importer.DownloadAssets {
-			createDirIfNotExist(filepath.Join(importer.CardImagesPath, setJson.Code))
+			createDirIfNotExist(filepath.Join(CardImagesDir(importer.ImagesDir), setJson.Code))
 			if _, found := iconNameDone[iconName]; !found {
 				iconNameDone[iconName] = struct{}{}
 				importer.wg.Add(1)
@@ -269,16 +267,16 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
 	iconName := setJson.getIconName()
-	svgFilePath := filepath.Join(importer.SetIconsPath, fmt.Sprintf("%s.svg", iconName))
-	jpgFilePath := filepath.Join(importer.SetIconsPath, fmt.Sprintf("%s.jpg", iconName))
-	if _, err := os.Stat(jpgFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
+	svgFilePath := filepath.Join(SetIconsDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
+	pngFilePath := SetIconPath(importer.ImagesDir, iconName)
+	if _, err := os.Stat(pngFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
 		err := downloadFile(svgFilePath, setJson.IconSvgUri)
 		if err != nil {
 			importer.errorsChan <- err
 			return
 		}
 
-		err = runCmd("rsvg-convert", svgFilePath, "-b", "white", "-o", jpgFilePath)
+		err = runCmd("rsvg-convert", svgFilePath, "-b", "white", "-o", pngFilePath)
 		if err != nil {
 			importer.errorsChan <- err
 		}
@@ -290,11 +288,11 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
 	importer.bar.Increment()
-	imageUrl := cardJson.ImageUris.Large
+	imageUrl := cardJson.ImageUris.Png
 	if imageUrl == "" && len(cardJson.CardFaces) > 0 {
-		imageUrl = cardJson.CardFaces[0].ImageUris.Large
+		imageUrl = cardJson.CardFaces[0].ImageUris.Png
 	}
-	filePath := filepath.Join(importer.CardImagesPath, cardJson.SetCode, fmt.Sprintf("%s_%s.jpg", cardJson.SetCode, cardJson.CollectorNumber))
+	filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber)
 	if _, err := os.Stat(filePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
 		err = downloadFile(filePath, imageUrl)
 		if err != nil {

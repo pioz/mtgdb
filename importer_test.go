@@ -17,19 +17,18 @@ func TestImport(t *testing.T) {
 
 	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
 	importer.DownloadAssets = true
-	importer.SetIconsPath = "/tmp/mtgscan_test/images/sets"
-	importer.CardImagesPath = "/tmp/mtgscan_test/images/cards"
+	importer.ImagesDir = "/tmp/mtgscan_test/images"
 
 	collection := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
 
-	_, err := os.Stat("/tmp/mtgscan_test/images/sets/eld.jpg")
+	_, err := os.Stat("/tmp/mtgscan_test/images/sets/eld.png")
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat("/tmp/mtgscan_test/images/sets/isd.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/sets/isd.png")
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat("/tmp/mtgscan_test/images/sets/ust.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/sets/ust.png")
 	assert.False(t, os.IsNotExist(err))
 
 	assert.Equal(t, 8, len(collection))
@@ -51,7 +50,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "1", card.CollectorNumber)
 	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_1.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_1.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[1]
@@ -71,7 +70,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "19", card.CollectorNumber)
 	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/teld/teld_19.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/teld/teld_19.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[2]
@@ -91,7 +90,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "65", card.CollectorNumber)
 	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
 	assert.Equal(t, "ust", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/ust/ust_65.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/ust/ust_65.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[3]
@@ -111,7 +110,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "191", card.CollectorNumber)
 	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_191.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_191.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[4]
@@ -131,7 +130,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "1s", card.CollectorNumber)
 	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1s.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1s.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[5]
@@ -151,7 +150,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "1p", card.CollectorNumber)
 	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1p.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1p.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[6]
@@ -171,7 +170,7 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "176", card.CollectorNumber)
 	assert.Equal(t, "25b54a1d-e201-453b-9173-b04e06ee6fb7", card.ScryfallId)
 	assert.Equal(t, "isd", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/isd/isd_176.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/isd/isd_176.png")
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[7]
@@ -191,6 +190,6 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "334", card.CollectorNumber)
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
 	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_334.jpg")
+	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_334.png")
 	assert.False(t, os.IsNotExist(err))
 }
