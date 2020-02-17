@@ -29,6 +29,7 @@ type Importer struct {
 	ForceDownloadData   bool
 	DownloadAssets      bool
 	ForceDownloadAssets bool
+	ImageType           string
 
 	errorsChan          chan error
 	wg                  sync.WaitGroup
@@ -44,6 +45,7 @@ func NewImporter(dataDir string) *Importer {
 		ForceDownloadData:   false,
 		DownloadAssets:      true,
 		ForceDownloadAssets: false,
+		ImageType:           "normal",
 		errorsChan:          make(chan error, 10),
 		downloaderSemaphore: make(chan struct{}, 50),
 	}
@@ -201,7 +203,25 @@ type cardJsonStruct struct {
 }
 
 type imagesCardJsonStruct struct {
-	Png string `json:"png"`
+	Png    string `json:"png"`
+	Large  string `json:"large"`
+	Normal string `json:"normal"`
+	Small  string `json:"normal"`
+}
+
+func (images *imagesCardJsonStruct) GetImageByTypeName(name string) string {
+	switch name {
+	case "png":
+		return images.Png
+	case "large":
+		return images.Large
+	case "normal":
+		return images.Normal
+	case "small":
+		return images.Small
+	default:
+		return images.Normal
+	}
 }
 
 type cardFaceStruct struct {
@@ -273,15 +293,15 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 
 	iconName := setJson.getIconName()
 	svgFilePath := filepath.Join(SetIconsDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
-	pngFilePath := SetIconPath(importer.ImagesDir, iconName)
-	if _, err := os.Stat(pngFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
+	setIconFilePath := SetIconPath(importer.ImagesDir, iconName)
+	if _, err := os.Stat(setIconFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
 		err := downloadFile(svgFilePath, setJson.IconSvgUri)
 		if err != nil {
 			importer.errorsChan <- err
 			return
 		}
 
-		err = runCmd("rsvg-convert", svgFilePath, "-b", "white", "-o", pngFilePath)
+		err = runCmd("rsvg-convert", svgFilePath, "-b", "white", "-o", setIconFilePath)
 		if err != nil {
 			importer.errorsChan <- err
 		}
@@ -293,9 +313,9 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
 	importer.bar.Increment()
-	imageUrl := cardJson.ImageUris.Png
+	imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
 	if imageUrl == "" && len(cardJson.CardFaces) > 0 {
-		imageUrl = cardJson.CardFaces[0].ImageUris.Png
+		imageUrl = cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
 	}
 	filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber)
 	if _, err := os.Stat(filePath); importer.ForceDownloadAssets || os.IsNotExist(err) {

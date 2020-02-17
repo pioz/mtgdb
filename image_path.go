@@ -15,9 +15,9 @@ func SetIconsDir(imagesDir string) string {
 }
 
 func CardImagePath(imagesDir, setCode, collectorNumber string) string {
-	return strings.ToLower(filepath.Join(CardImagesDir(imagesDir), setCode, fmt.Sprintf("%s_%s.png", setCode, collectorNumber)))
+	return strings.ToLower(filepath.Join(CardImagesDir(imagesDir), setCode, fmt.Sprintf("%s_%s.jpg", setCode, collectorNumber)))
 }
 
 func SetIconPath(imagesDir, setCode string) string {
-	return strings.ToLower(filepath.Join(SetIconsDir(imagesDir), fmt.Sprintf("%s.png", setCode)))
+	return strings.ToLower(filepath.Join(SetIconsDir(imagesDir), fmt.Sprintf("%s.jpg", setCode)))
 }
