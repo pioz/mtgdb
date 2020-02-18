@@ -13,9 +13,8 @@ func TestCardIsValid(t *testing.T) {
 
 	card = mtgdb.Card{
 		EnName:          "Gilded Goose",
-		SetCode:         "eld",
 		CollectorNumber: "160",
-		IconName:        "eld",
+		SetCode:         "eld",
 	}
 	assert.True(t, card.IsValid())
 }
@@ -23,21 +22,10 @@ func TestCardIsValid(t *testing.T) {
 func TestCardImagePath(t *testing.T) {
 	card := mtgdb.Card{
 		EnName:          "Gilded Goose",
-		SetCode:         "PELD",
 		CollectorNumber: "160",
-		IconName:        "eld",
-	}
-	assert.Equal(t, "images/cards/peld/peld_160.png", card.ImagePath("./images"))
-}
-
-func TestCardSetIconPath(t *testing.T) {
-	card := mtgdb.Card{
-		EnName:          "Gilded Goose",
 		SetCode:         "peld",
-		CollectorNumber: "160",
-		IconName:        "eld",
 	}
-	assert.Equal(t, "images/sets/eld.png", card.SetIconPath("./images"))
+	assert.Equal(t, "images/cards/peld/peld_160.jpg", card.ImagePath("./images"))
 }
 
 func TestCardSetName(t *testing.T) {

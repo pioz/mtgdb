@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/pioz/mtgdb/pb"
 )
 
@@ -51,18 +50,18 @@ func NewImporter(dataDir string) *Importer {
 	}
 }
 
-func (importer *Importer) DownloadData() error {
-	createDirIfNotExist(importer.DataDir)
+func (self *Importer) DownloadData() error {
+	createDirIfNotExist(self.DataDir)
 
-	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
-	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
-	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
+	allSetsJsonFilePath := filepath.Join(self.DataDir, "all_sets.json")
+	allCardsJsonFilePath := filepath.Join(self.DataDir, "all_cards.json")
+	if _, err := os.Stat(allSetsJsonFilePath); self.ForceDownloadData || os.IsNotExist(err) {
 		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
 			return err
 		}
 	}
-	if _, err := os.Stat(allCardsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
+	if _, err := os.Stat(allCardsJsonFilePath); self.ForceDownloadData || os.IsNotExist(err) {
 		err = downloadFile(allCardsJsonFilePath, "https://archive.scryfall.com/json/scryfall-all-cards.json")
 		if err != nil {
 			return err
@@ -71,41 +70,41 @@ func (importer *Importer) DownloadData() error {
 	return nil
 }
 
-func (importer *Importer) BuildCardsFromJson() []Card {
-	defer removeAllFilesByExtension(SetIconsDir(importer.ImagesDir), "svg")
-	if importer.DownloadAssets {
-		createDirIfNotExist(SetIconsDir(importer.ImagesDir))
+func (self *Importer) BuildCardsFromJson() []Card {
+	defer removeAllFilesByExtension(SetImagesDir(self.ImagesDir), "svg")
+	if self.DownloadAssets {
+		createDirIfNotExist(SetImagesDir(self.ImagesDir))
 	}
 
 	setsJson := setsJsonStruct{}
-	err := loadFile(filepath.Join(importer.DataDir, "all_sets.json"), &setsJson)
+	err := loadFile(filepath.Join(self.DataDir, "all_sets.json"), &setsJson)
 	if err != nil {
 		panic(err)
 	}
 
-	setCodeToIconNameMap := importer.getIconNamesAndDownloadSetIcons(&setsJson)
+	setCodeToIconNameMap := self.getIconNamesAndDownloadSetIcons(&setsJson)
 
 	allCardsJson := make([]cardJsonStruct, 0, 60000)
-	err = loadFile(filepath.Join(importer.DataDir, "all_cards.json"), &allCardsJson)
+	err = loadFile(filepath.Join(self.DataDir, "all_cards.json"), &allCardsJson)
 	if err != nil {
 		panic(err)
 	}
 
-	if importer.DownloadAssets {
-		importer.bar = pb.New("Download images", 0)
+	if self.DownloadAssets {
+		self.bar = pb.New("Download images", 0)
 	}
 	collection := make(map[string]*Card)
 	for _, cardJson := range allCardsJson {
-		if len(importer.OnlyTheseSetCodes) != 0 && !contains(importer.OnlyTheseSetCodes, cardJson.SetCode) {
+		if len(self.OnlyTheseSetCodes) != 0 && !contains(self.OnlyTheseSetCodes, cardJson.SetCode) {
 			continue
 		}
-		importer.buildCardAndDownloadCardImage(collection, &cardJson, setCodeToIconNameMap[cardJson.SetCode])
+		self.buildCardAndDownloadCardImage(collection, &cardJson, setCodeToIconNameMap[cardJson.SetCode])
 	}
 
-	waitErrors(&importer.wg, importer.errorsChan)
-	close(importer.errorsChan)
-	if importer.DownloadAssets {
-		importer.bar.Finishln()
+	waitErrors(&self.wg, self.errorsChan)
+	close(self.errorsChan)
+	if self.DownloadAssets {
+		self.bar.Finishln()
 	}
 	cards := make([]Card, 0, len(collection))
 	for _, card := range collection {
@@ -114,30 +113,63 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	return cards
 }
 
-func BulkInsert(db *gorm.DB, objects []Card, bulkSize int) error {
-	scope := db.NewScope(Card{})
+func AutoMigrate(db *gorm.DB) {
+	db.AutoMigrate(&Set{})
+	db.Model(&Set{}).AddUniqueIndex("idx_sets_code", "code")
+	db.AutoMigrate(&Card{})
+	db.Model(&Card{}).AddUniqueIndex("idx_cards_set_code_collector_number_is_token", "set_code", "collector_number", "is_token")
+	db.Model(&Card{}).AddIndex("idx_cards_en_name", "en_name")
+	db.Model(&Card{}).AddForeignKey("set_code", "sets(code)", "RESTRICT", "RESTRICT")
+}
+
+func BulkInsert(db *gorm.DB, cards []Card) error {
+	sets := make(map[string]Set)
+	for _, card := range cards {
+		if _, found := sets[card.SetCode]; !found && card.SetCode != "" {
+			sets[card.SetCode] = card.Set
+		}
+	}
+	allSets := make([]Set, 0, len(sets))
+	for _, set := range sets {
+		allSets = append(allSets, set)
+	}
+	err := bulkInsert(db, Set{}, allSets, 1000)
+	if err != nil {
+		return err
+	}
+	return bulkInsert(db, Card{}, cards, 1000)
+}
+
+func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize int) error {
+	scope := db.NewScope(table)
 	fields := scope.Fields()
 	quoted := make([]string, 0, len(fields))
 	placeholders := make([]string, 0, len(fields))
 	onUpdate := make([]string, 0, len(fields))
 	for _, field := range fields {
-		if (field.IsPrimaryKey && field.IsBlank) || (field.IsIgnored) {
+		if (field.IsPrimaryKey && field.IsBlank) || field.IsIgnored || !field.IsNormal {
 			continue
 		}
 		quoted = append(quoted, field.DBName)
 		placeholders = append(placeholders, "?")
 		onUpdate = append(onUpdate, fmt.Sprintf("%s = VALUES(%s)", field.DBName, field.DBName))
 	}
-	for i := 0; i < len(objects); i += bulkSize {
+	slice := reflect.ValueOf(objects)
+	if slice.Kind() != reflect.Slice {
+		panic("BulkInsert `objects` param given a non-slice type")
+	}
+	for i := 0; i < slice.Len(); i += bulkSize {
 		allPlacehoders := make([]string, 0, bulkSize*len(fields))
 		allValues := make([]interface{}, 0, bulkSize*len(fields))
 		end := i + bulkSize
-		if end > len(objects) {
-			end = len(objects)
+		if end > slice.Len() {
+			end = slice.Len()
 		}
-		for _, obj := range objects[i:end] {
+		subslice := slice.Slice(i, end)
+		for j := 0; j < subslice.Len(); j++ {
+			obj := subslice.Index(j).Interface()
 			for _, field := range fields {
-				if (field.IsPrimaryKey && field.IsBlank) || (field.IsIgnored) {
+				if (field.IsPrimaryKey && field.IsBlank) || field.IsIgnored || !field.IsNormal {
 					continue
 				}
 				allValues = append(allValues, reflect.ValueOf(obj).FieldByName(field.Name).Interface())
@@ -150,11 +182,6 @@ func BulkInsert(db *gorm.DB, objects []Card, bulkSize int) error {
 			strings.Join(allPlacehoders, ","),
 			strings.Join(onUpdate, ","),
 		)
-		// query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;",
-		// 	scope.QuotedTableName(),
-		// 	strings.Join(quoted, ","),
-		// 	strings.Join(allPlacehoders, ","),
-		// )
 		errors := db.Exec(query, allValues...).GetErrors()
 		if len(errors) > 0 {
 			return errors[0]
@@ -175,16 +202,16 @@ type setJsonStruct struct {
 	ParentSetCode string `json:"parent_set_code"`
 }
 
-func (set *setJsonStruct) getIconName() string {
-	basename := filepath.Base(set.IconSvgUri)
+func (self *setJsonStruct) getIconName() string {
+	basename := filepath.Base(self.IconSvgUri)
 	return strings.Split(basename, ".")[0]
 }
 
-func (setJson *setJsonStruct) getParentCode() (code string) {
-	if setJson.ParentSetCode != "" {
-		code = setJson.ParentSetCode
+func (self *setJsonStruct) getParentCode() (code string) {
+	if self.ParentSetCode != "" {
+		code = self.ParentSetCode
 	} else {
-		code = setJson.Code
+		code = self.Code
 	}
 	return strings.ToLower(code)
 }
@@ -198,6 +225,7 @@ type cardJsonStruct struct {
 	ImageUris       imagesCardJsonStruct `json:"image_uris"`
 	CardFaces       []cardFaceStruct     `json:"card_faces"`
 	SetCode         string               `json:"set"`
+	SetName         string               `json:"set_name"`
 	SetType         string               `json:"set_type"`
 	CollectorNumber string               `json:"collector_number"`
 }
@@ -206,21 +234,21 @@ type imagesCardJsonStruct struct {
 	Png    string `json:"png"`
 	Large  string `json:"large"`
 	Normal string `json:"normal"`
-	Small  string `json:"normal"`
+	Small  string `json:"small"`
 }
 
-func (images *imagesCardJsonStruct) GetImageByTypeName(name string) string {
+func (self *imagesCardJsonStruct) GetImageByTypeName(name string) string {
 	switch name {
 	case "png":
-		return images.Png
+		return self.Png
 	case "large":
-		return images.Large
+		return self.Large
 	case "normal":
-		return images.Normal
+		return self.Normal
 	case "small":
-		return images.Small
+		return self.Small
 	default:
-		return images.Normal
+		return self.Normal
 	}
 }
 
@@ -263,11 +291,15 @@ func (importer *Importer) buildCardAndDownloadCardImage(collection map[string]*C
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
-			IconName:        iconName,
+			Set: Set{
+				Name:     cardJson.SetName,
+				Code:     cardJson.SetCode,
+				IconName: iconName,
+			},
 		}
 		releasedAt, err := time.Parse("2006-01-02", cardJson.ReleasedAt)
 		if err == nil {
-			card.ReleasedAt = &releasedAt
+			card.Set.ReleasedAt = &releasedAt
 		}
 		collection[key] = card
 		if importer.DownloadAssets {
@@ -292,8 +324,8 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
 	iconName := setJson.getIconName()
-	svgFilePath := filepath.Join(SetIconsDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
-	setIconFilePath := SetIconPath(importer.ImagesDir, iconName)
+	svgFilePath := filepath.Join(SetImagesDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
+	setIconFilePath := SetImagePath(importer.ImagesDir, iconName)
 	if _, err := os.Stat(setIconFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
 		err := downloadFile(svgFilePath, setJson.IconSvgUri)
 		if err != nil {

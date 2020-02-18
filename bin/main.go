@@ -21,19 +21,17 @@ func main() {
 	}
 
 	log.Println("Open connection to database")
-	db, err := gorm.Open("mysql", "root@tcp(127.0.0.1:3306)/mtgscan?charset=utf8mb4&parseTime=True")
+	db, err := gorm.Open("mysql", "root@tcp(127.0.0.1:3306)/mtgdb?charset=utf8mb4&parseTime=True")
 	if err != nil {
 		panic("Failed to connect database")
 	}
 	log.Println("Database migration")
-	db.AutoMigrate(&mtgdb.Card{})
-	db.Model(&mtgdb.Card{}).AddUniqueIndex("idx_cards_set_code_collector_number", "set_code", "collector_number", "is_token")
-	db.Model(&mtgdb.Card{}).AddIndex("idx_cards_en_name_released_at", "en_name", "released_at")
+	mtgdb.AutoMigrate(db)
 
 	log.Println("Filling database")
 	start := time.Now()
 	collection := importer.BuildCardsFromJson()
-	err = mtgdb.BulkInsert(db, collection, 1000)
+	err = mtgdb.BulkInsert(db, collection)
 	if err != nil {
 		log.Println(err)
 	}

@@ -1,7 +1,5 @@
 package mtgdb
 
-import "time"
-
 type Card struct {
 	EnName          string `gorm:"not null"`
 	EsName          string
@@ -15,47 +13,41 @@ type Card struct {
 	ZhsName         string
 	ZhtName         string
 	SetCode         string `gorm:"not null"`
+	Set             Set    `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
 	CollectorNumber string `gorm:"not null"`
 	IsToken         bool   `gorm:"not null"`
-	ReleasedAt      *time.Time
-	IconName        string `gorm:"not null"`
 	ScryfallId      string
-	ExternalId      string
 }
 
-func (card *Card) IsValid() bool {
-	return card.EnName != "" && card.SetCode != "" && card.CollectorNumber != "" && card.IconName != ""
+func (self *Card) IsValid() bool {
+	return self.EnName != "" && self.SetCode != "" && self.CollectorNumber != ""
 }
 
-func (card *Card) ImagePath(dataImagesPath string) string {
-	return CardImagePath(dataImagesPath, card.SetCode, card.CollectorNumber)
+func (self *Card) ImagePath(dataImagesPath string) string {
+	return CardImagePath(dataImagesPath, self.SetCode, self.CollectorNumber)
 }
 
-func (card *Card) SetIconPath(dataImagesPath string) string {
-	return SetIconPath(dataImagesPath, card.IconName)
-}
-
-func (card *Card) SetName(name, language string) {
+func (self *Card) SetName(name, language string) {
 	switch language {
 	case "es", "Spanish":
-		card.EsName = name
+		self.EsName = name
 	case "fr", "French":
-		card.FrName = name
+		self.FrName = name
 	case "de", "German":
-		card.DeName = name
+		self.DeName = name
 	case "it", "Italian":
-		card.ItName = name
+		self.ItName = name
 	case "pt", "Portuguese", "Portuguese (Brazil)":
-		card.PtName = name
+		self.PtName = name
 	case "ja", "jp", "Japanese":
-		card.JaName = name
+		self.JaName = name
 	case "ko", "Korean":
-		card.KoName = name
+		self.KoName = name
 	case "ru", "Russian":
-		card.RuName = name
+		self.RuName = name
 	case "zhs", "Chinese Simplified":
-		card.ZhsName = name
+		self.ZhsName = name
 	case "zht", "Chinese Traditional":
-		card.ZhtName = name
+		self.ZhtName = name
 	}
 }

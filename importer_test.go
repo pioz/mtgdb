@@ -6,29 +6,43 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/pioz/mtgdb"
 	"github.com/stretchr/testify/assert"
 )
 
 const FIXTURES_PATH = "./fixtures"
+const TEMP_DIR = "/tmp/mtgdb_test"
 
-func TestImport(t *testing.T) {
-	defer os.RemoveAll("/tmp/mtgscan_test")
+// func TestImporterDownloadData(t *testing.T) {
+// 	defer os.RemoveAll(TEMP_DIR)
+
+// 	importer := mtgdb.NewImporter(TEMP_DIR)
+// 	importer.DownloadData()
+// 	_, err := os.Stat(filepath.Join(TEMP_DIR, "all_sets.json"))
+// 	assert.False(t, os.IsNotExist(err))
+// 	_, err = os.Stat(filepath.Join(TEMP_DIR, "all_cards.json"))
+// 	assert.False(t, os.IsNotExist(err))
+// }
+
+func TestImporterBuildCardsFromJson(t *testing.T) {
+	defer os.RemoveAll("/tmp/mtgdb_test")
 
 	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
 	importer.DownloadAssets = true
-	importer.ImagesDir = "/tmp/mtgscan_test/images"
+	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
 	collection := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
 
-	_, err := os.Stat("/tmp/mtgscan_test/images/sets/eld.png")
+	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/sets/eld.jpg"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat("/tmp/mtgscan_test/images/sets/isd.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/isd.jpg"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat("/tmp/mtgscan_test/images/sets/ust.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/ust.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	assert.Equal(t, 8, len(collection))
@@ -47,11 +61,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "受誉竞争者", card.ZhsName)
 	assert.Equal(t, "受譽競爭者", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
+	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1", card.CollectorNumber)
-	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_1.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_1.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[1]
@@ -68,11 +84,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "teld", card.SetCode)
+	assert.Equal(t, "teld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine Tokens", card.Set.Name)
+	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "19", card.CollectorNumber)
-	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/teld/teld_19.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[2]
@@ -89,11 +107,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "ust", card.SetCode)
+	assert.Equal(t, "ust", card.Set.Code)
+	assert.Equal(t, "Unstable", card.Set.Name)
+	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "ust", card.Set.IconName)
 	assert.Equal(t, "65", card.CollectorNumber)
-	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
-	assert.Equal(t, "ust", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/ust/ust_65.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[3]
@@ -110,11 +130,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
+	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "191", card.CollectorNumber)
-	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_191.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_191.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[4]
@@ -131,11 +153,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "peld", card.SetCode)
+	assert.Equal(t, "peld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine Promos", card.Set.Name)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1s", card.CollectorNumber)
-	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1s.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1s.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[5]
@@ -152,11 +176,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "peld", card.SetCode)
+	assert.Equal(t, "peld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine Promos", card.Set.Name)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1p", card.CollectorNumber)
-	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/peld/peld_1p.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1p.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[6]
@@ -173,11 +199,13 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "破晓护林人 // 夜幕掠食者", card.ZhsName)
 	assert.Equal(t, "破曉護林人 // 夜幕掠食者", card.ZhtName)
 	assert.Equal(t, "isd", card.SetCode)
+	assert.Equal(t, "isd", card.Set.Code)
+	assert.Equal(t, "Innistrad", card.Set.Name)
+	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "isd", card.Set.IconName)
 	assert.Equal(t, "176", card.CollectorNumber)
-	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "25b54a1d-e201-453b-9173-b04e06ee6fb7", card.ScryfallId)
-	assert.Equal(t, "isd", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/isd/isd_176.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[7]
@@ -194,10 +222,73 @@ func TestImport(t *testing.T) {
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
+	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "334", card.CollectorNumber)
-	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
-	assert.Equal(t, "eld", card.IconName)
-	_, err = os.Stat("/tmp/mtgscan_test/images/cards/eld/eld_334.png")
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334.jpg"))
 	assert.False(t, os.IsNotExist(err))
+}
+
+func TestBulkInsert(t *testing.T) {
+	db, _ := gorm.Open("mysql", "root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True")
+	mtgdb.AutoMigrate(db)
+
+	cards := []mtgdb.Card{
+		mtgdb.Card{
+			EnName:          "Gilded Goose",
+			CollectorNumber: "160",
+			SetCode:         "eld",
+			Set: mtgdb.Set{
+				Name:     "Throne of Eldraine",
+				Code:     "eld",
+				IconName: "eld",
+			},
+		},
+		mtgdb.Card{
+			EnName:          "Acclaimed Contender",
+			CollectorNumber: "1",
+			SetCode:         "eld",
+			Set: mtgdb.Set{
+				Name:     "Throne of Eldraine",
+				Code:     "eld",
+				IconName: "eld",
+			},
+		},
+		mtgdb.Card{
+			EnName:          "Daybreak Ranger // Nightfall Predator",
+			CollectorNumber: "176",
+			SetCode:         "isd",
+			Set: mtgdb.Set{
+				Name:     "Innistrad",
+				Code:     "isd",
+				IconName: "isd",
+			},
+		},
+	}
+
+	mtgdb.BulkInsert(db, cards)
+
+	db.Preload("Set").Find(&cards)
+	assert.Equal(t, 3, len(cards))
+
+	assert.Equal(t, "Gilded Goose", cards[0].EnName)
+	assert.Equal(t, "160", cards[0].CollectorNumber)
+	assert.Equal(t, "eld", cards[0].SetCode)
+	assert.Equal(t, "Throne of Eldraine", cards[0].Set.Name)
+	assert.Equal(t, "eld", cards[0].Set.Code)
+
+	assert.Equal(t, "Acclaimed Contender", cards[1].EnName)
+	assert.Equal(t, "1", cards[1].CollectorNumber)
+	assert.Equal(t, "eld", cards[1].SetCode)
+	assert.Equal(t, "Throne of Eldraine", cards[1].Set.Name)
+	assert.Equal(t, "eld", cards[1].Set.Code)
+
+	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", cards[2].EnName)
+	assert.Equal(t, "176", cards[2].CollectorNumber)
+	assert.Equal(t, "isd", cards[2].SetCode)
+	assert.Equal(t, "Innistrad", cards[2].Set.Name)
+	assert.Equal(t, "isd", cards[2].Set.Code)
 }
