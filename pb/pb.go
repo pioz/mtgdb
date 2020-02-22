@@ -19,6 +19,7 @@ func New(text string, max int) *ProgressBar {
 		progressbar.OptionThrottle(200*time.Millisecond),
 	)
 	bar.Describe(text)
+	bar.RenderBlank()
 	return bar
 }
 

@@ -27,7 +27,7 @@ const TEMP_DIR = "/tmp/mtgdb_test"
 // }
 
 func TestImporterBuildCardsFromJson(t *testing.T) {
-	defer os.RemoveAll("/tmp/mtgdb_test")
+	defer os.RemoveAll(TEMP_DIR)
 
 	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
 	importer.DownloadAssets = true
@@ -271,24 +271,24 @@ func TestBulkInsert(t *testing.T) {
 
 	mtgdb.BulkInsert(db, cards)
 
-	db.Preload("Set").Find(&cards)
+	db.Preload("Set").Order("en_name").Find(&cards)
 	assert.Equal(t, 3, len(cards))
 
-	assert.Equal(t, "Gilded Goose", cards[0].EnName)
-	assert.Equal(t, "160", cards[0].CollectorNumber)
+	assert.Equal(t, "Acclaimed Contender", cards[0].EnName)
+	assert.Equal(t, "1", cards[0].CollectorNumber)
 	assert.Equal(t, "eld", cards[0].SetCode)
 	assert.Equal(t, "Throne of Eldraine", cards[0].Set.Name)
 	assert.Equal(t, "eld", cards[0].Set.Code)
 
-	assert.Equal(t, "Acclaimed Contender", cards[1].EnName)
-	assert.Equal(t, "1", cards[1].CollectorNumber)
-	assert.Equal(t, "eld", cards[1].SetCode)
-	assert.Equal(t, "Throne of Eldraine", cards[1].Set.Name)
-	assert.Equal(t, "eld", cards[1].Set.Code)
+	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", cards[1].EnName)
+	assert.Equal(t, "176", cards[1].CollectorNumber)
+	assert.Equal(t, "isd", cards[1].SetCode)
+	assert.Equal(t, "Innistrad", cards[1].Set.Name)
+	assert.Equal(t, "isd", cards[1].Set.Code)
 
-	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", cards[2].EnName)
-	assert.Equal(t, "176", cards[2].CollectorNumber)
-	assert.Equal(t, "isd", cards[2].SetCode)
-	assert.Equal(t, "Innistrad", cards[2].Set.Name)
-	assert.Equal(t, "isd", cards[2].Set.Code)
+	assert.Equal(t, "Gilded Goose", cards[2].EnName)
+	assert.Equal(t, "160", cards[2].CollectorNumber)
+	assert.Equal(t, "eld", cards[2].SetCode)
+	assert.Equal(t, "Throne of Eldraine", cards[2].Set.Name)
+	assert.Equal(t, "eld", cards[2].Set.Code)
 }
