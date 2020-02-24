@@ -10,8 +10,13 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/joho/godotenv"
 	"github.com/pioz/mtgdb"
 )
+
+func init() {
+	godotenv.Load()
+}
 
 func main() {
 	var forceDownloadData, skipDownloadAssets, help bool
@@ -33,7 +38,7 @@ func main() {
 	}
 
 	log.Println("Importer initialization")
-	importer := mtgdb.NewImporter("./data")
+	importer := mtgdb.NewImporter(os.Getenv("DATA_PATH"))
 	importer.ForceDownloadData = forceDownloadData
 	importer.DownloadAssets = !skipDownloadAssets
 	if setsString != "" && len(sets) > 0 {
@@ -47,7 +52,7 @@ func main() {
 	}
 
 	log.Println("Open connection to database")
-	db, err := gorm.Open("mysql", "root@tcp(127.0.0.1:3306)/mtgdb?charset=utf8mb4&parseTime=True")
+	db, err := gorm.Open("mysql", os.Getenv("DB_CONNECTION"))
 	if err != nil {
 		panic("Failed to connect database")
 	}
