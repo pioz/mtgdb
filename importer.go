@@ -88,17 +88,21 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 
 	setCodeToIconNameMap := importer.getIconNamesAndDownloadSetIcons(&setsJson)
 
-	allCardsJson := make([]cardJsonStruct, 0, 60000)
-	err = loadFile(filepath.Join(importer.DataDir, "all_cards.json"), &allCardsJson)
-	if err != nil {
-		panic(err)
-	}
-
 	if importer.DownloadAssets {
 		importer.bar = pb.New("Download images", 0)
 	}
+
+	streamer, err := NewJsonStreamer(filepath.Join(importer.DataDir, "all_cards.json"))
+	if err != nil {
+		panic(err)
+	}
 	collection := make(map[string]*Card)
-	for _, cardJson := range allCardsJson {
+	for streamer.Next() {
+		var cardJson cardJsonStruct
+		err := streamer.Get(&cardJson)
+		if err != nil {
+			panic(err)
+		}
 		if len(importer.OnlyTheseSetCodes) != 0 && !contains(importer.OnlyTheseSetCodes, cardJson.SetCode) {
 			continue
 		}
