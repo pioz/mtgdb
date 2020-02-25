@@ -50,18 +50,22 @@ func NewImporter(dataDir string) *Importer {
 	}
 }
 
-func (self *Importer) DownloadData() error {
-	createDirIfNotExist(self.DataDir)
+func (importer *Importer) SetDownloadConcurrency(n int) {
+	importer.downloaderSemaphore = make(chan struct{}, n)
+}
 
-	allSetsJsonFilePath := filepath.Join(self.DataDir, "all_sets.json")
-	allCardsJsonFilePath := filepath.Join(self.DataDir, "all_cards.json")
-	if _, err := os.Stat(allSetsJsonFilePath); self.ForceDownloadData || os.IsNotExist(err) {
+func (importer *Importer) DownloadData() error {
+	createDirIfNotExist(importer.DataDir)
+
+	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
+	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
+	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
 		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
 			return err
 		}
 	}
-	if _, err := os.Stat(allCardsJsonFilePath); self.ForceDownloadData || os.IsNotExist(err) {
+	if _, err := os.Stat(allCardsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
 		err = downloadFile(allCardsJsonFilePath, "https://archive.scryfall.com/json/scryfall-all-cards.json")
 		if err != nil {
 			return err
@@ -70,41 +74,41 @@ func (self *Importer) DownloadData() error {
 	return nil
 }
 
-func (self *Importer) BuildCardsFromJson() []Card {
-	defer removeAllFilesByExtension(SetImagesDir(self.ImagesDir), "svg")
-	if self.DownloadAssets {
-		createDirIfNotExist(SetImagesDir(self.ImagesDir))
+func (importer *Importer) BuildCardsFromJson() []Card {
+	defer removeAllFilesByExtension(SetImagesDir(importer.ImagesDir), "svg")
+	if importer.DownloadAssets {
+		createDirIfNotExist(SetImagesDir(importer.ImagesDir))
 	}
 
 	setsJson := setsJsonStruct{}
-	err := loadFile(filepath.Join(self.DataDir, "all_sets.json"), &setsJson)
+	err := loadFile(filepath.Join(importer.DataDir, "all_sets.json"), &setsJson)
 	if err != nil {
 		panic(err)
 	}
 
-	setCodeToIconNameMap := self.getIconNamesAndDownloadSetIcons(&setsJson)
+	setCodeToIconNameMap := importer.getIconNamesAndDownloadSetIcons(&setsJson)
 
 	allCardsJson := make([]cardJsonStruct, 0, 60000)
-	err = loadFile(filepath.Join(self.DataDir, "all_cards.json"), &allCardsJson)
+	err = loadFile(filepath.Join(importer.DataDir, "all_cards.json"), &allCardsJson)
 	if err != nil {
 		panic(err)
 	}
 
-	if self.DownloadAssets {
-		self.bar = pb.New("Download images", 0)
+	if importer.DownloadAssets {
+		importer.bar = pb.New("Download images", 0)
 	}
 	collection := make(map[string]*Card)
 	for _, cardJson := range allCardsJson {
-		if len(self.OnlyTheseSetCodes) != 0 && !contains(self.OnlyTheseSetCodes, cardJson.SetCode) {
+		if len(importer.OnlyTheseSetCodes) != 0 && !contains(importer.OnlyTheseSetCodes, cardJson.SetCode) {
 			continue
 		}
-		self.buildCardAndDownloadCardImage(collection, &cardJson, setCodeToIconNameMap[cardJson.SetCode])
+		importer.buildCardAndDownloadCardImage(collection, &cardJson, setCodeToIconNameMap[cardJson.SetCode])
 	}
 
-	waitErrors(&self.wg, self.errorsChan)
-	close(self.errorsChan)
-	if self.DownloadAssets {
-		self.bar.Finishln()
+	waitErrors(&importer.wg, importer.errorsChan)
+	close(importer.errorsChan)
+	if importer.DownloadAssets {
+		importer.bar.Finishln()
 	}
 	cards := make([]Card, 0, len(collection))
 	for _, card := range collection {
@@ -202,16 +206,16 @@ type setJsonStruct struct {
 	ParentSetCode string `json:"parent_set_code"`
 }
 
-func (self *setJsonStruct) getIconName() string {
-	basename := filepath.Base(self.IconSvgUri)
+func (setJson *setJsonStruct) getIconName() string {
+	basename := filepath.Base(setJson.IconSvgUri)
 	return strings.Split(basename, ".")[0]
 }
 
-func (self *setJsonStruct) getParentCode() (code string) {
-	if self.ParentSetCode != "" {
-		code = self.ParentSetCode
+func (setJson *setJsonStruct) getParentCode() (code string) {
+	if setJson.ParentSetCode != "" {
+		code = setJson.ParentSetCode
 	} else {
-		code = self.Code
+		code = setJson.Code
 	}
 	return strings.ToLower(code)
 }
@@ -237,18 +241,18 @@ type imagesCardJsonStruct struct {
 	Small  string `json:"small"`
 }
 
-func (self *imagesCardJsonStruct) GetImageByTypeName(name string) string {
+func (imagesCardJson *imagesCardJsonStruct) GetImageByTypeName(name string) string {
 	switch name {
 	case "png":
-		return self.Png
+		return imagesCardJson.Png
 	case "large":
-		return self.Large
+		return imagesCardJson.Large
 	case "normal":
-		return self.Normal
+		return imagesCardJson.Normal
 	case "small":
-		return self.Small
+		return imagesCardJson.Small
 	default:
-		return self.Normal
+		return imagesCardJson.Normal
 	}
 }
 
