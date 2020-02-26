@@ -13,7 +13,7 @@ type Card struct {
 	ZhsName         string
 	ZhtName         string
 	SetCode         string `gorm:"not null"`
-	Set             Set    `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
+	Set             *Set   `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
 	CollectorNumber string `gorm:"not null"`
 	IsToken         bool   `gorm:"not null"`
 	ScryfallId      string

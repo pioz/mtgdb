@@ -2,6 +2,7 @@ package mtgdb
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -17,11 +18,13 @@ func NewJsonStreamer(filepath string) (*JsonStreamer, error) {
 	if err != nil {
 		return nil, err
 	}
-	// defer file.Close()
 	decoder := json.NewDecoder(file)
-	_, err = decoder.Token()
+	token, err := decoder.Token()
 	if err != nil {
 		return nil, err
+	}
+	if delim, ok := token.(json.Delim); !ok || delim != '[' {
+		return nil, errors.New("json is not an array")
 	}
 	return &JsonStreamer{Decoder: decoder, file: file}, nil
 }

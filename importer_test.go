@@ -241,7 +241,7 @@ func TestBulkInsert(t *testing.T) {
 			EnName:          "Gilded Goose",
 			CollectorNumber: "160",
 			SetCode:         "eld",
-			Set: mtgdb.Set{
+			Set: &mtgdb.Set{
 				Name:     "Throne of Eldraine",
 				Code:     "eld",
 				IconName: "eld",
@@ -251,7 +251,7 @@ func TestBulkInsert(t *testing.T) {
 			EnName:          "Acclaimed Contender",
 			CollectorNumber: "1",
 			SetCode:         "eld",
-			Set: mtgdb.Set{
+			Set: &mtgdb.Set{
 				Name:     "Throne of Eldraine",
 				Code:     "eld",
 				IconName: "eld",
@@ -261,7 +261,7 @@ func TestBulkInsert(t *testing.T) {
 			EnName:          "Daybreak Ranger // Nightfall Predator",
 			CollectorNumber: "176",
 			SetCode:         "isd",
-			Set: mtgdb.Set{
+			Set: &mtgdb.Set{
 				Name:     "Innistrad",
 				Code:     "isd",
 				IconName: "isd",

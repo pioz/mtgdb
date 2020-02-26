@@ -12,7 +12,7 @@ type cardJsonStruct struct {
 	Name string `json:"name"`
 }
 
-func TestJsonStreamer(t *testing.T) {
+func TestJsonStreamerArray(t *testing.T) {
 	names := []string{
 		"Acclaimed Contender",
 		"Acclaimed Contender",
@@ -44,10 +44,7 @@ func TestJsonStreamer(t *testing.T) {
 		"Daybreak Ranger // Nightfall Predator",
 		"Garruk, Cursed Huntsman",
 	}
-	streamer, err := mtgdb.NewJsonStreamer(filepath.Join("./fixtures", "data", "all_cards.json"))
-	if err != nil {
-		panic(err)
-	}
+	streamer, _ := mtgdb.NewJsonStreamer(filepath.Join("./fixtures", "data", "all_cards.json"))
 	var cardJson cardJsonStruct
 	i := 0
 	for streamer.Next() {
@@ -55,4 +52,9 @@ func TestJsonStreamer(t *testing.T) {
 		assert.Equal(t, names[i], cardJson.Name, i)
 		i++
 	}
+}
+
+func TestJsonStreamerObject(t *testing.T) {
+	_, err := mtgdb.NewJsonStreamer(filepath.Join("./fixtures", "data", "stream_me.json"))
+	assert.Error(t, err, "json is not an array")
 }

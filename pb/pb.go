@@ -13,6 +13,9 @@ type ProgressBar struct {
 
 func New(text string, max int) *ProgressBar {
 	bar := &ProgressBar{}
+	if max == 0 {
+		max = 1
+	}
 	bar.ProgressBar = progressbar.NewOptions(
 		max,
 		progressbar.OptionSetTheme(progressbar.Theme{Saucer: "=", SaucerHead: ">", SaucerPadding: "_", BarStart: "[", BarEnd: "]"}),

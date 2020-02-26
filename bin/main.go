@@ -26,7 +26,7 @@ func main() {
 	flag.BoolVar(&skipDownloadAssets, "skip-assets", false, "Skip download of set and card images")
 	flag.IntVar(&downloadConcurrency, "download-concurrency", 0, "Set max download concurrency")
 	flag.BoolVar(&help, "h", false, "Print this help")
-	flag.StringVar(&setsString, "only", "", "Import some sets (es: --only eld,war)")
+	flag.StringVar(&setsString, "only", "", "Import some sets (es: -only eld,war)")
 	flag.Parse()
 	if help {
 		flag.Usage()

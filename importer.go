@@ -30,6 +30,10 @@ type Importer struct {
 	ForceDownloadAssets bool
 	ImageType           string
 
+	cardCollection     map[string]*Card
+	setCollection      map[string]*Set
+	setIconsDownloaded map[string]struct{}
+
 	errorsChan          chan error
 	wg                  sync.WaitGroup
 	downloaderSemaphore chan struct{}
@@ -76,8 +80,12 @@ func (importer *Importer) DownloadData() error {
 
 func (importer *Importer) BuildCardsFromJson() []Card {
 	defer removeAllFilesByExtension(SetImagesDir(importer.ImagesDir), "svg")
+
+	importer.cardCollection = make(map[string]*Card)
+	importer.setCollection = make(map[string]*Set)
 	if importer.DownloadAssets {
 		createDirIfNotExist(SetImagesDir(importer.ImagesDir))
+		importer.setIconsDownloaded = make(map[string]struct{})
 	}
 
 	setsJson := setsJsonStruct{}
@@ -85,8 +93,12 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	if err != nil {
 		panic(err)
 	}
-
-	setCodeToIconNameMap := importer.getIconNamesAndDownloadSetIcons(&setsJson)
+	for _, setJson := range setsJson.Data {
+		if len(importer.OnlyTheseSetCodes) != 0 && !contains(importer.OnlyTheseSetCodes, setJson.Code) {
+			continue
+		}
+		importer.buildSet(&setJson)
+	}
 
 	if importer.DownloadAssets {
 		importer.bar = pb.New("Download images", 0)
@@ -96,7 +108,6 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	if err != nil {
 		panic(err)
 	}
-	collection := make(map[string]*Card)
 	for streamer.Next() {
 		var cardJson cardJsonStruct
 		err := streamer.Get(&cardJson)
@@ -106,7 +117,7 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 		if len(importer.OnlyTheseSetCodes) != 0 && !contains(importer.OnlyTheseSetCodes, cardJson.SetCode) {
 			continue
 		}
-		importer.buildCardAndDownloadCardImage(collection, &cardJson, setCodeToIconNameMap[cardJson.SetCode])
+		importer.buildCard(&cardJson)
 	}
 
 	waitErrors(&importer.wg, importer.errorsChan)
@@ -114,8 +125,8 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	if importer.DownloadAssets {
 		importer.bar.Finishln()
 	}
-	cards := make([]Card, 0, len(collection))
-	for _, card := range collection {
+	cards := make([]Card, 0, len(importer.cardCollection))
+	for _, card := range importer.cardCollection {
 		cards = append(cards, *card)
 	}
 	return cards
@@ -131,7 +142,7 @@ func AutoMigrate(db *gorm.DB) {
 }
 
 func BulkInsert(db *gorm.DB, cards []Card) error {
-	sets := make(map[string]Set)
+	sets := make(map[string]*Set)
 	for _, card := range cards {
 		if _, found := sets[card.SetCode]; !found && card.SetCode != "" {
 			sets[card.SetCode] = card.Set
@@ -139,7 +150,7 @@ func BulkInsert(db *gorm.DB, cards []Card) error {
 	}
 	allSets := make([]Set, 0, len(sets))
 	for _, set := range sets {
-		allSets = append(allSets, set)
+		allSets = append(allSets, *set)
 	}
 	err := bulkInsert(db, Set{}, allSets, 1000)
 	if err != nil {
@@ -148,6 +159,7 @@ func BulkInsert(db *gorm.DB, cards []Card) error {
 	return bulkInsert(db, Card{}, cards, 1000)
 }
 
+// Object must be an array of pointers
 func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize int) error {
 	scope := db.NewScope(table)
 	fields := scope.Fields()
@@ -205,7 +217,9 @@ type setsJsonStruct struct {
 }
 
 type setJsonStruct struct {
+	Name          string `json:"name"`
 	Code          string `json:"code"`
+	ReleasedAt    string `json:"released_at"`
 	IconSvgUri    string `json:"icon_svg_uri"`
 	ParentSetCode string `json:"parent_set_code"`
 }
@@ -265,33 +279,40 @@ type cardFaceStruct struct {
 	ImageUris   imagesCardJsonStruct `json:"image_uris"`
 }
 
-// PRIVATE methods
+// PRIVATE functions
 
-func (importer *Importer) getIconNamesAndDownloadSetIcons(setsJson *setsJsonStruct) map[string]string {
-	setCodeToIconNameMap := make(map[string]string)
-	iconNameDone := make(map[string]struct{})
-	for _, setJson := range setsJson.Data {
-		iconName := setJson.getIconName()
-		setCodeToIconNameMap[setJson.Code] = iconName
+func (importer *Importer) buildSet(setJson *setJsonStruct) {
+	iconName := setJson.getIconName()
+	if _, found := importer.setCollection[setJson.Code]; !found {
+		set := &Set{
+			Name:     setJson.Name,
+			Code:     setJson.Code,
+			IconName: iconName,
+		}
+		releasedAt, err := time.Parse("2006-01-02", setJson.ReleasedAt)
+		if err == nil {
+			set.ReleasedAt = &releasedAt
+		}
+		importer.setCollection[setJson.Code] = set
+
 		if importer.DownloadAssets {
 			createDirIfNotExist(filepath.Join(CardImagesDir(importer.ImagesDir), setJson.Code))
-			if _, found := iconNameDone[iconName]; !found {
-				iconNameDone[iconName] = struct{}{}
+			if _, found := importer.setIconsDownloaded[iconName]; !found {
+				importer.setIconsDownloaded[iconName] = struct{}{}
 				importer.wg.Add(1)
-				go importer.downloadSetIcon(setJson)
+				go importer.downloadSetIcon(*setJson)
 			}
 		}
 	}
-	return setCodeToIconNameMap
 }
 
-func (importer *Importer) buildCardAndDownloadCardImage(collection map[string]*Card, cardJson *cardJsonStruct, iconName string) {
+func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	isToken := false
 	if cardJson.SetType == "token" {
 		isToken = true
 	}
 	key := fmt.Sprintf("%s-%s", cardJson.SetCode, cardJson.CollectorNumber)
-	card, found := collection[key]
+	card, found := importer.cardCollection[key]
 	if !found {
 		card = &Card{
 			ScryfallId:      cardJson.Id,
@@ -299,17 +320,9 @@ func (importer *Importer) buildCardAndDownloadCardImage(collection map[string]*C
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
-			Set: Set{
-				Name:     cardJson.SetName,
-				Code:     cardJson.SetCode,
-				IconName: iconName,
-			},
+			Set:             importer.setCollection[cardJson.SetCode],
 		}
-		releasedAt, err := time.Parse("2006-01-02", cardJson.ReleasedAt)
-		if err == nil {
-			card.Set.ReleasedAt = &releasedAt
-		}
-		collection[key] = card
+		importer.cardCollection[key] = card
 		if importer.DownloadAssets {
 			importer.wg.Add(1)
 			importer.bar.IncrementMax()
@@ -352,7 +365,6 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
-	importer.bar.Increment()
 	imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
 	if imageUrl == "" && len(cardJson.CardFaces) > 0 {
 		imageUrl = cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
@@ -364,6 +376,7 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 			importer.errorsChan <- err
 		}
 	}
+	importer.bar.Increment()
 }
 
 func downloadFile(filepath, url string) error {
