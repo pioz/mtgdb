@@ -34,6 +34,7 @@ jobs:
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
+        container port: 3307
         mysql root password: password
         mysql database: mtgdb_test
         mysql user: root
