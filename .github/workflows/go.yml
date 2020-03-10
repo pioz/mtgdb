@@ -34,10 +34,10 @@ jobs:
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
       with:
-        mysql root password:
+        mysql root password: password
         mysql database: mtgdb_test
         mysql user: root
-        mysql password:
+        mysql password: password
 
     - name: Test
       run: go test
