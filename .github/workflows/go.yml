@@ -30,7 +30,6 @@ jobs:
             dep ensure
         fi
         sudo apt-get install default-mysql-server librsvg2-bin
-        echo "create database `mtgdb_test`" | mysql
 
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
