@@ -30,18 +30,10 @@ jobs:
             dep ensure
         fi
         sudo apt-get install librsvg2-bin
-
-    - name: Setup MySQL
-      uses: mirromutth/mysql-action@v1.1
-      with:
-        host port: 3307
-        mysql root password: passw0rd
-        mysql database: mtgdb_test
-        mysql user: root
-        mysql password: passw0rd
+        echo "create database mtgdb_test" | mysql -uroot -proot
 
     - name: Test
-      run: DB_CONNECTION="root:passw0rd@tcp(127.0.0.1:3307)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
+      run: DB_CONNECTION="root:root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
       
     - name: Build
       run: go build -o mtgdb ./bin/main.go
