@@ -237,7 +237,10 @@ func TestBulkInsert(t *testing.T) {
 	if dbConnection == "" {
 		dbConnection = "root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True"
 	}
-	db, _ := gorm.Open("mysql", dbConnection)
+	db, err := gorm.Open("mysql", dbConnection)
+	if err != nil {
+		panic(err)
+	}
 	mtgdb.AutoMigrate(db)
 
 	cards := []mtgdb.Card{
