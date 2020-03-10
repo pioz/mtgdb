@@ -1,5 +1,7 @@
 # MTGDB
 
+![Go](https://github.com/pioz/mtgdb/workflows/Go/badge.svg)
+
 MTGDB is a tool written in [GO](https://golang.org) to create and populate a
 database with all [Magic The Gathering](https://magic.wizards.com/) cards
 available from [Scryfall](https://scryfall.com/). MTGDB also download the
