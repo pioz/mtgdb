@@ -233,7 +233,11 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 }
 
 func TestBulkInsert(t *testing.T) {
-	db, _ := gorm.Open("mysql", "root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True")
+	dbConnection := os.Getenv("DB_CONNECTION")
+	if dbConnection == "" {
+		dbConnection = "root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True"
+	}
+	db, _ := gorm.Open("mysql", dbConnection)
 	mtgdb.AutoMigrate(db)
 
 	cards := []mtgdb.Card{
