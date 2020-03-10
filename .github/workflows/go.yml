@@ -29,7 +29,7 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-        apt-get install librsvg2-bin
+        sudo apt-get install librsvg2-bin
 
     - name: Test
       run: go test
