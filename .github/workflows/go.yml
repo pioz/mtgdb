@@ -29,7 +29,8 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
-        sudo apt-get install librsvg2-bin
+        sudo apt-get install default-mysql-server librsvg2-bin
+        echo "create database `mtgdb_test`" | mysql
 
     - name: Test
       run: go test
