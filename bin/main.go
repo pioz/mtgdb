@@ -61,6 +61,7 @@ func main() {
 	if err != nil {
 		panic("Failed to connect database")
 	}
+	// db.LogMode(true)
 	log.Println("Database migration")
 	mtgdb.AutoMigrate(db)
 
