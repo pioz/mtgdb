@@ -1,6 +1,7 @@
 package mtgdb
 
 type Card struct {
+	ID              uint   `gorm:"primary_key"`
 	EnName          string `gorm:"not null"`
 	EsName          string
 	FrName          string
@@ -19,35 +20,35 @@ type Card struct {
 	ScryfallId      string
 }
 
-func (self *Card) IsValid() bool {
-	return self.EnName != "" && self.SetCode != "" && self.CollectorNumber != ""
+func (card *Card) IsValid() bool {
+	return card.EnName != "" && card.SetCode != "" && card.CollectorNumber != ""
 }
 
-func (self *Card) ImagePath(dataImagesPath string) string {
-	return CardImagePath(dataImagesPath, self.SetCode, self.CollectorNumber)
+func (card *Card) ImagePath(dataImagesPath string) string {
+	return CardImagePath(dataImagesPath, card.SetCode, card.CollectorNumber)
 }
 
-func (self *Card) SetName(name, language string) {
+func (card *Card) SetName(name, language string) {
 	switch language {
 	case "es", "Spanish":
-		self.EsName = name
+		card.EsName = name
 	case "fr", "French":
-		self.FrName = name
+		card.FrName = name
 	case "de", "German":
-		self.DeName = name
+		card.DeName = name
 	case "it", "Italian":
-		self.ItName = name
+		card.ItName = name
 	case "pt", "Portuguese", "Portuguese (Brazil)":
-		self.PtName = name
+		card.PtName = name
 	case "ja", "jp", "Japanese":
-		self.JaName = name
+		card.JaName = name
 	case "ko", "Korean":
-		self.KoName = name
+		card.KoName = name
 	case "ru", "Russian":
-		self.RuName = name
+		card.RuName = name
 	case "zhs", "Chinese Simplified":
-		self.ZhsName = name
+		card.ZhsName = name
 	case "zht", "Chinese Traditional":
-		self.ZhtName = name
+		card.ZhtName = name
 	}
 }
