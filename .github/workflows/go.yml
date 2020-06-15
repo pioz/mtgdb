@@ -12,7 +12,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-
+      
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
       with:
@@ -30,10 +30,15 @@ jobs:
             dep ensure
         fi
         sudo apt-get install librsvg2-bin
-        echo "create database mtgdb_test" | mysql -uroot -proot
+      
+    - name: Start MySQL
+      run: sudo /etc/init.d/mysql start
+      
+    - name: Create empty database
+      run: echo "create database mtgdb_test" | mysql -uroot -proot
 
-    - name: Test
+    - name: Run mtgdb test
       run: DB_CONNECTION="root:root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
       
-    - name: Build
+    - name: Build mtgdb
       run: go build -o mtgdb ./bin/main.go
