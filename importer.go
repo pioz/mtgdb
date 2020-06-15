@@ -320,7 +320,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
-			IsDoubleFace:    isDoubleFace(cardJson),
+			IsDoubleFaced:   isDoubleFaced(cardJson),
 			Set:             importer.setCollection[cardJson.SetCode],
 		}
 		importer.cardCollection[key] = card
@@ -366,7 +366,7 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
-	if isDoubleFace(&cardJson) {
+	if isDoubleFaced(&cardJson) {
 		imageUrl := cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
 		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, false)
 		importer.downloadImage(imageUrl, filePath)
@@ -390,7 +390,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 	}
 }
 
-func isDoubleFace(cardJson *cardJsonStruct) bool {
+func isDoubleFaced(cardJson *cardJsonStruct) bool {
 	return len(cardJson.CardFaces) > 1 && cardJson.CardFaces[0].ImageUris != (imagesCardJsonStruct{}) && cardJson.CardFaces[1].ImageUris != (imagesCardJsonStruct{})
 }
 

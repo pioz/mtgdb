@@ -17,7 +17,7 @@ type Card struct {
 	Set             *Set   `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
 	CollectorNumber string `gorm:"not null"`
 	IsToken         bool   `gorm:"not null"`
-	IsDoubleFace    bool   `gorm:"not null"`
+	IsDoubleFaced   bool   `gorm:"not null"`
 	ScryfallId      string
 }
 

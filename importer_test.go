@@ -49,7 +49,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card := collection[0]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "Contendiente aclamada", card.EsName)
 	assert.Equal(t, "Concurrente acclamée", card.FrName)
@@ -75,7 +75,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[1]
 	assert.True(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Garruk, Cursed Huntsman Emblem", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -99,7 +99,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[2]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "\"Rumors of My Death . . .\"", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -123,7 +123,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[3]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Garruk, Cursed Huntsman", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -147,7 +147,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[4]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -171,7 +171,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[5]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -195,7 +195,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[6]
 	assert.False(t, card.IsToken)
-	assert.True(t, card.IsDoubleFace)
+	assert.True(t, card.IsDoubleFaced)
 	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", card.EnName)
 	assert.Equal(t, "Guardabosque del amanecer // Depredadora del anochecer", card.EsName)
 	assert.Equal(t, "Ranger de l'aube // Prédateur du crépuscule", card.FrName)
@@ -221,7 +221,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	card = collection[7]
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFace)
+	assert.False(t, card.IsDoubleFaced)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
