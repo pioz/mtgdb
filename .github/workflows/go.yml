@@ -21,6 +21,13 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+    
+    - name: Setup MySQL
+    - uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql version: '8.0'
+        mysql database: 'mtgdb_test'
+        mysql root password: 'root'
 
     - name: Get dependencies
       run: |
