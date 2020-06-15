@@ -17,6 +17,7 @@ type Card struct {
 	Set             *Set   `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
 	CollectorNumber string `gorm:"not null"`
 	IsToken         bool   `gorm:"not null"`
+	IsDoubleFace    bool   `gorm:"not null"`
 	ScryfallId      string
 }
 
@@ -24,8 +25,8 @@ func (card *Card) IsValid() bool {
 	return card.EnName != "" && card.SetCode != "" && card.CollectorNumber != ""
 }
 
-func (card *Card) ImagePath(dataImagesPath string) string {
-	return CardImagePath(dataImagesPath, card.SetCode, card.CollectorNumber)
+func (card *Card) ImagePath(dataImagesPath string, backImage bool) string {
+	return CardImagePath(dataImagesPath, card.SetCode, card.CollectorNumber, backImage)
 }
 
 func (card *Card) SetName(name, language string) {

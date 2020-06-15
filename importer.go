@@ -320,6 +320,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
+			IsDoubleFace:    isDoubleFace(cardJson),
 			Set:             importer.setCollection[cardJson.SetCode],
 		}
 		importer.cardCollection[key] = card
@@ -365,18 +366,32 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
-	imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
-	if imageUrl == "" && len(cardJson.CardFaces) > 0 {
-		imageUrl = cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
+	if isDoubleFace(&cardJson) {
+		imageUrl := cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, false)
+		importer.downloadImage(imageUrl, filePath)
+		imageUrl = cardJson.CardFaces[1].ImageUris.GetImageByTypeName(importer.ImageType)
+		filePath = CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, true)
+		importer.downloadImage(imageUrl, filePath)
+	} else {
+		imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, false)
+		importer.downloadImage(imageUrl, filePath)
 	}
-	filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber)
+	importer.bar.Increment()
+}
+
+func (importer *Importer) downloadImage(imageUrl, filePath string) {
 	if _, err := os.Stat(filePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
 		err = downloadFile(filePath, imageUrl)
 		if err != nil {
 			importer.errorsChan <- err
 		}
 	}
-	importer.bar.Increment()
+}
+
+func isDoubleFace(cardJson *cardJsonStruct) bool {
+	return len(cardJson.CardFaces) > 1 && cardJson.CardFaces[0].ImageUris != (imagesCardJsonStruct{}) && cardJson.CardFaces[1].ImageUris != (imagesCardJsonStruct{})
 }
 
 func downloadFile(filepath, url string) error {

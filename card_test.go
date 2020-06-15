@@ -25,7 +25,8 @@ func TestCardImagePath(t *testing.T) {
 		CollectorNumber: "160",
 		SetCode:         "peld",
 	}
-	assert.Equal(t, "images/cards/peld/peld_160.jpg", card.ImagePath("./images"))
+	assert.Equal(t, "images/cards/peld/peld_160.jpg", card.ImagePath("./images", false))
+	assert.Equal(t, "images/cards/peld/peld_160_back.jpg", card.ImagePath("./images", true))
 }
 
 func TestCardSetName(t *testing.T) {
