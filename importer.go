@@ -70,7 +70,11 @@ func (importer *Importer) DownloadData() error {
 		}
 	}
 	if _, err := os.Stat(allCardsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
-		err = downloadFile(allCardsJsonFilePath, "https://archive.scryfall.com/json/scryfall-all-cards.json")
+		allCardsDataUrl, err := fetchAllCardsDataUrl()
+		if err != nil {
+			return err
+		}
+		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl)
 		if err != nil {
 			return err
 		}
@@ -212,6 +216,15 @@ func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize in
 
 // PRIVATE types
 
+type bulkDataJsonStruct struct {
+	Type        string `json:"type"`
+	DownloadUri string `json:"download_uri"`
+}
+
+type bulkDataArrayJsonStruct struct {
+	Data []bulkDataJsonStruct `json:data`
+}
+
 type setsJsonStruct struct {
 	Data []setJsonStruct `json:"data"`
 }
@@ -280,6 +293,33 @@ type cardFaceStruct struct {
 }
 
 // PRIVATE functions
+
+func fetchAllCardsDataUrl() (string, error) {
+	resp, err := http.Get("https://api.scryfall.com/bulk-data")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	var bulkDataArray bulkDataArrayJsonStruct
+	var cardsUrl string
+	err = json.Unmarshal(body, &bulkDataArray)
+	if err != nil {
+		return "", err
+	}
+	for _, bulkData := range bulkDataArray.Data {
+		if bulkData.Type == "all_cards" {
+			cardsUrl = bulkData.DownloadUri
+		}
+	}
+	if cardsUrl == "" {
+		return "", errors.New("Impossible to retrieve all cards data url")
+	}
+	return cardsUrl, nil
+}
 
 func (importer *Importer) buildSet(setJson *setJsonStruct) {
 	iconName := setJson.getIconName()
