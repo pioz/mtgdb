@@ -11,6 +11,7 @@ All expansion sets will be saved in the table `sets` with the following
 fields:
 
 ```
+id
 name        # Throne of Eldraine
 code        # eld
 released_at # 2019-10-04
@@ -20,6 +21,7 @@ icon_name   # eld
 All cards will be saved in the table `cards` with the following fields:
 
 ```
+id
 en_name          # Questing Beast
 es_name          # La Bestia Buscada
 fr_name          # Bête de Quête
