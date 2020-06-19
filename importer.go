@@ -22,13 +22,14 @@ import (
 )
 
 type Importer struct {
-	DataDir             string
-	ImagesDir           string
-	OnlyTheseSetCodes   []string
-	ForceDownloadData   bool
-	DownloadAssets      bool
-	ForceDownloadAssets bool
-	ImageType           string
+	DataDir                  string
+	ImagesDir                string
+	OnlyTheseSetCodes        []string
+	ForceDownloadData        bool
+	DownloadAssets           bool
+	ForceDownloadOlderAssets bool
+	ForceDownloadAssets      bool
+	ImageType                string
 
 	cardCollection     map[string]*Card
 	setCollection      map[string]*Set
@@ -42,15 +43,16 @@ type Importer struct {
 
 func NewImporter(dataDir string) *Importer {
 	return &Importer{
-		DataDir:             dataDir,
-		OnlyTheseSetCodes:   []string{},
-		ImagesDir:           filepath.Join(dataDir, "images"),
-		ForceDownloadData:   false,
-		DownloadAssets:      true,
-		ForceDownloadAssets: false,
-		ImageType:           "normal",
-		errorsChan:          make(chan error, 10),
-		downloaderSemaphore: make(chan struct{}, 50),
+		DataDir:                  dataDir,
+		OnlyTheseSetCodes:        []string{},
+		ImagesDir:                filepath.Join(dataDir, "images"),
+		ForceDownloadData:        false,
+		DownloadAssets:           true,
+		ForceDownloadOlderAssets: false,
+		ForceDownloadAssets:      false,
+		ImageType:                "normal",
+		errorsChan:               make(chan error, 10),
+		downloaderSemaphore:      make(chan struct{}, 50),
 	}
 }
 
@@ -64,7 +66,7 @@ func (importer *Importer) DownloadData() error {
 	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
 	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
 	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
-		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
+		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets", nil)
 		if err != nil {
 			return err
 		}
@@ -74,7 +76,7 @@ func (importer *Importer) DownloadData() error {
 		if err != nil {
 			return err
 		}
-		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl)
+		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl, nil)
 		if err != nil {
 			return err
 		}
@@ -389,7 +391,7 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 	svgFilePath := filepath.Join(SetImagesDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
 	setIconFilePath := SetImagePath(importer.ImagesDir, iconName)
 	if _, err := os.Stat(setIconFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
-		err := downloadFile(svgFilePath, setJson.IconSvgUri)
+		err := downloadFile(svgFilePath, setJson.IconSvgUri, nil)
 		if err != nil {
 			importer.errorsChan <- err
 			return
@@ -422,8 +424,8 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 }
 
 func (importer *Importer) downloadImage(imageUrl, filePath string) {
-	if _, err := os.Stat(filePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
-		err = downloadFile(filePath, imageUrl)
+	if stat, err := os.Stat(filePath); importer.ForceDownloadAssets || importer.ForceDownloadOlderAssets || os.IsNotExist(err) {
+		err = downloadFile(filePath, imageUrl, stat)
 		if err != nil {
 			importer.errorsChan <- err
 		}
@@ -434,15 +436,33 @@ func isDoubleFaced(cardJson *cardJsonStruct) bool {
 	return len(cardJson.CardFaces) > 1 && cardJson.CardFaces[0].ImageUris != (imagesCardJsonStruct{}) && cardJson.CardFaces[1].ImageUris != (imagesCardJsonStruct{})
 }
 
-func downloadFile(filepath, url string) error {
+func downloadFile(filepath, url string, stat os.FileInfo) error {
 	return retryOnError(3, 100*time.Millisecond, func() error {
+		if stat != nil {
+			resp, err := http.Head(url)
+			if err != nil {
+				return err
+			}
+			if resp.StatusCode != 200 {
+				return httpError(url, resp.StatusCode)
+			}
+
+			lastModified := resp.Header.Get("last-modified")
+			if lastModified != "" {
+				remoteLastModified, err := time.Parse(time.RFC1123, lastModified)
+				if err == nil && remoteLastModified.Before(stat.ModTime()) {
+					return nil
+				}
+			}
+		}
+
 		resp, err := http.Get(url)
 		if err != nil {
 			return err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
-			return errors.New(fmt.Sprintf("Download file `%s` filed with status code %d", url, resp.StatusCode))
+			return httpError(url, resp.StatusCode)
 		}
 
 		file, err := os.Create(filepath)
@@ -454,6 +474,10 @@ func downloadFile(filepath, url string) error {
 		_, err = io.Copy(file, resp.Body)
 		return err
 	})
+}
+
+func httpError(url string, statusCode int) error {
+	return errors.New(fmt.Sprintf("Download file `%s` failed with status code %d", url, statusCode))
 }
 
 func runCmd(arg string, args ...string) error {

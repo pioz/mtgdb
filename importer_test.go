@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -310,4 +311,29 @@ func TestBulkInsert(t *testing.T) {
 	assert.Equal(t, "eld", cards[2].SetCode)
 	assert.Equal(t, "Throne of Eldraine", cards[2].Set.Name)
 	assert.Equal(t, "eld", cards[2].Set.Code)
+}
+
+func TestDownloadFile(t *testing.T) {
+	os.MkdirAll(TEMP_DIR, os.ModePerm)
+	file := filepath.Join(TEMP_DIR, "teferi.png")
+	defer os.RemoveAll(TEMP_DIR)
+	url := "https://img.scryfall.com/cards/normal/front/5/d/5d10b752-d9cb-419d-a5c4-d4ee1acb655e.jpg?1562736365"
+
+	mtgdb.DownloadFile(file, url, nil)
+	_, err := os.Stat(file)
+	assert.False(t, os.IsNotExist(err))
+
+	olderTime, _ := time.Parse(time.RFC3339, "1990-01-01T00:00:00.00Z")
+	err = os.Chtimes(file, olderTime, olderTime)
+	stat, _ := os.Stat(file)
+	mtgdb.DownloadFile(file, url, stat)
+	stat, _ = os.Stat(file)
+	assert.False(t, olderTime.Equal(stat.ModTime()))
+
+	newerTime, _ := time.Parse(time.RFC3339, "2020-06-01T00:00:00.00Z")
+	err = os.Chtimes(file, newerTime, newerTime)
+	stat, _ = os.Stat(file)
+	mtgdb.DownloadFile(file, url, stat)
+	stat, _ = os.Stat(file)
+	assert.True(t, newerTime.Equal(stat.ModTime()))
 }
