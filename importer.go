@@ -366,11 +366,11 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			Set:             importer.setCollection[cardJson.SetCode],
 		}
 		importer.cardCollection[key] = card
-		if importer.DownloadAssets && cardJson.Lang == "en" {
-			importer.wg.Add(1)
-			importer.bar.IncrementMax()
-			go importer.downloadCardImage(*cardJson)
-		}
+	}
+	if importer.DownloadAssets && cardJson.Lang == "en" {
+		importer.wg.Add(1)
+		importer.bar.IncrementMax()
+		go importer.downloadCardImage(*cardJson)
 	}
 	printedName := cardJson.PrintedName
 	if printedName == "" && len(cardJson.CardFaces) > 1 {
