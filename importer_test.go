@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const FIXTURES_PATH = "./fixtures"
+const FIXTURES_PATH = "./testdata"
 const TEMP_DIR = "/tmp/mtgdb_test"
 
 // func TestImporterDownloadData(t *testing.T) {
@@ -289,7 +289,10 @@ func TestBulkInsert(t *testing.T) {
 		},
 	}
 
-	mtgdb.BulkInsert(db, cards)
+	err = mtgdb.BulkInsert(db, cards)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	db.Preload("Set").Order("en_name").Find(&cards)
 	assert.Equal(t, 3, len(cards))
@@ -314,26 +317,59 @@ func TestBulkInsert(t *testing.T) {
 }
 
 func TestDownloadFile(t *testing.T) {
-	os.MkdirAll(TEMP_DIR, os.ModePerm)
+	err := os.MkdirAll(TEMP_DIR, os.ModePerm)
+	if err != nil {
+		t.Fatal(err)
+	}
 	file := filepath.Join(TEMP_DIR, "teferi.png")
 	defer os.RemoveAll(TEMP_DIR)
-	url := "https://img.scryfall.com/cards/normal/front/5/d/5d10b752-d9cb-419d-a5c4-d4ee1acb655e.jpg?1562736365"
+	url := "https://c1.scryfall.com/file/scryfall-cards/normal/front/5/d/5d10b752-d9cb-419d-a5c4-d4ee1acb655e.jpg?1562736365"
 
-	mtgdb.DownloadFile(file, url, nil)
-	_, err := os.Stat(file)
+	err = mtgdb.DownloadFile(file, url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
 	assert.False(t, os.IsNotExist(err))
 
 	olderTime, _ := time.Parse(time.RFC3339, "1990-01-01T00:00:00.00Z")
 	err = os.Chtimes(file, olderTime, olderTime)
-	stat, _ := os.Stat(file)
-	mtgdb.DownloadFile(file, url, stat)
-	stat, _ = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err := os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = mtgdb.DownloadFile(file, url, stat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
 	assert.False(t, olderTime.Equal(stat.ModTime()))
 
 	newerTime, _ := time.Parse(time.RFC3339, "2020-06-01T00:00:00.00Z")
 	err = os.Chtimes(file, newerTime, newerTime)
-	stat, _ = os.Stat(file)
-	mtgdb.DownloadFile(file, url, stat)
-	stat, _ = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = mtgdb.DownloadFile(file, url, stat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err = os.Stat(file)
+	if err != nil {
+		panic(err)
+	}
 	assert.True(t, newerTime.Equal(stat.ModTime()))
 }

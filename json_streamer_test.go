@@ -44,11 +44,14 @@ func TestJsonStreamerArray(t *testing.T) {
 		"Daybreak Ranger // Nightfall Predator",
 		"Garruk, Cursed Huntsman",
 	}
-	streamer, _ := mtgdb.NewJsonStreamer(filepath.Join("./fixtures", "data", "all_cards.json"))
+	streamer, _ := mtgdb.NewJsonStreamer(filepath.Join("./testdata", "data", "all_cards.json"))
 	var cardJson cardJsonStruct
 	i := 0
 	for streamer.Next() {
-		streamer.Get(&cardJson)
+		err := streamer.Get(&cardJson)
+		if err != nil {
+			t.Fatal(err)
+		}
 		assert.Equal(t, names[i], cardJson.Name, i)
 		i++
 	}

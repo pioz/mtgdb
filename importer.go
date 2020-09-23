@@ -224,7 +224,7 @@ type bulkDataJsonStruct struct {
 }
 
 type bulkDataArrayJsonStruct struct {
-	Data []bulkDataJsonStruct `json:data`
+	Data []bulkDataJsonStruct `json:"data"`
 }
 
 type setsJsonStruct struct {
@@ -477,7 +477,7 @@ func downloadFile(filepath, url string, stat os.FileInfo) error {
 }
 
 func httpError(url string, statusCode int) error {
-	return errors.New(fmt.Sprintf("Download file `%s` failed with status code %d", url, statusCode))
+	return fmt.Errorf("Download file `%s` failed with status code %d", url, statusCode)
 }
 
 func runCmd(arg string, args ...string) error {
@@ -486,7 +486,7 @@ func runCmd(arg string, args ...string) error {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Command `%s` fail: %s\n%s", cmd.String(), err, stderr.String()))
+		return fmt.Errorf("Command `%s` fail: %s\n%s", cmd.String(), err, stderr.String())
 	}
 	return nil
 }
@@ -522,23 +522,25 @@ func contains(collection []string, s string) bool {
 	return false
 }
 
-func removeAllFilesByExtension(dirPath, ext string) error {
+func removeAllFilesByExtension(dirPath, ext string) {
 	files, err := filepath.Glob(filepath.Join(dirPath, fmt.Sprintf("*.%s", ext)))
 	if err != nil {
-		return err
+		panic(err)
 	}
 	for _, file := range files {
 		err = os.Remove(file)
 		if err != nil {
-			return err
+			panic(err)
 		}
 	}
-	return nil
 }
 
 func createDirIfNotExist(path string) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(path, os.ModePerm)
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

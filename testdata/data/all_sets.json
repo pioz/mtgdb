@@ -16,7 +16,7 @@
       "parent_set_code": "eld",
       "digital": false,
       "foil_only": false,
-      "icon_svg_uri": "https://img.scryfall.com/sets/eld.svg?1573448400"
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/eld.svg?1600660800"
     },
     {
       "object": "set",
@@ -34,7 +34,7 @@
       "card_count": 397,
       "digital": false,
       "foil_only": false,
-      "icon_svg_uri": "https://img.scryfall.com/sets/eld.svg?1573448400"
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/eld.svg?1600660800"
     },
     {
       "object": "set",
@@ -50,7 +50,7 @@
       "parent_set_code": "eld",
       "digital": false,
       "foil_only": false,
-      "icon_svg_uri": "https://img.scryfall.com/sets/eld.svg?1573448400"
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/eld.svg?1600660800"
     },
     {
       "object": "set",
@@ -66,7 +66,7 @@
       "card_count": 268,
       "digital": false,
       "foil_only": false,
-      "icon_svg_uri": "https://img.scryfall.com/sets/ust.svg?1573448400"
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/ust.svg?1600660800"
     },
     {
       "object": "set",
@@ -86,7 +86,7 @@
       "foil_only": false,
       "block_code": "isd",
       "block": "Innistrad",
-      "icon_svg_uri": "https://img.scryfall.com/sets/isd.svg?1573448400"
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/isd.svg?1600660800"
     }
   ]
 }
