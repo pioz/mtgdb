@@ -354,7 +354,7 @@ func TestDownloadFile(t *testing.T) {
 	}
 	assert.False(t, olderTime.Equal(stat.ModTime()))
 
-	newerTime, _ := time.Parse(time.RFC3339, "2020-06-01T00:00:00.00Z")
+	newerTime, _ := time.Parse(time.RFC3339, "2120-06-01T00:00:00.00Z")
 	err = os.Chtimes(file, newerTime, newerTime)
 	if err != nil {
 		t.Fatal(err)

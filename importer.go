@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -447,12 +448,8 @@ func downloadFile(filepath, url string, stat os.FileInfo) error {
 				return httpError(url, resp.StatusCode)
 			}
 
-			lastModified := resp.Header.Get("last-modified")
-			if lastModified != "" {
-				remoteLastModified, err := time.Parse(time.RFC1123, lastModified)
-				if err == nil && remoteLastModified.Before(stat.ModTime()) {
-					return nil
-				}
+			if !remoteFileIsUpdated(resp.Header, stat.ModTime()) {
+				return nil
 			}
 		}
 
@@ -474,6 +471,21 @@ func downloadFile(filepath, url string, stat os.FileInfo) error {
 		_, err = io.Copy(file, resp.Body)
 		return err
 	})
+}
+
+func remoteFileIsUpdated(header http.Header, fileModTime time.Time) bool {
+	lastModified := header.Get("last-modified")
+	remoteLastModified, err := time.Parse(time.RFC1123, lastModified)
+	if err == nil {
+		return remoteLastModified.After(fileModTime)
+	}
+
+	uploadTimestamp := header.Get("x-bz-upload-timestamp")
+	timestamp, err := strconv.ParseInt(uploadTimestamp, 10, 64)
+	if err == nil {
+		return time.Unix(timestamp/1000.0, 0).After(fileModTime)
+	}
+	return true
 }
 
 func httpError(url string, statusCode int) error {
