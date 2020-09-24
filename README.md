@@ -35,8 +35,11 @@ zhs_name         # 寻水兽
 zht_name         # 尋水獸
 set_code         # eld
 collector_number # 171
+languages        # ["en","de","ru","zhs","pt","fr","it","zht","es","ko","ja"]
+foil             # 1
+non_foil         # 1
+has_back_side    # 0
 is_token         # 0
-is_double_faced  # 0
 scryfall_id      # e41cf82d-3213-47ce-a015-6e51a8b07e4f
 ```
 
