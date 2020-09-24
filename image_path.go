@@ -3,7 +3,6 @@ package mtgdb
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 )
 
 func CardImagesDir(imagesDir string) string {
@@ -21,9 +20,9 @@ func CardImagePath(imagesDir, setCode, collectorNumber, locale string, backImage
 	} else {
 		fileName = fmt.Sprintf("%s_%s_%s_back.jpg", setCode, collectorNumber, locale)
 	}
-	return strings.ToLower(filepath.Join(CardImagesDir(imagesDir), setCode, fileName))
+	return filepath.Join(CardImagesDir(imagesDir), setCode, fileName)
 }
 
 func SetImagePath(imagesDir, setCode string) string {
-	return strings.ToLower(filepath.Join(SetImagesDir(imagesDir), fmt.Sprintf("%s.jpg", setCode)))
+	return filepath.Join(SetImagesDir(imagesDir), fmt.Sprintf("%s.jpg", setCode))
 }
