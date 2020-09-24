@@ -144,6 +144,7 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 func AutoMigrate(db *gorm.DB) {
 	db.AutoMigrate(&Set{})
 	db.Model(&Set{}).AddUniqueIndex("idx_sets_code", "code")
+	db.Model(&Set{}).AddIndex("idx_sets_parent_code", "parent_code")
 	db.AutoMigrate(&Card{})
 	db.Model(&Card{}).AddUniqueIndex("idx_cards_set_code_collector_number_is_token", "set_code", "collector_number", "is_token")
 	db.Model(&Card{}).AddIndex("idx_cards_en_name", "en_name")
@@ -211,12 +212,33 @@ func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize in
 			strings.Join(allPlacehoders, ","),
 			strings.Join(onUpdate, ","),
 		)
-		errors := db.Exec(query, allValues...).GetErrors()
-		if len(errors) > 0 {
-			return errors[0]
+		err := db.Exec(query, allValues...).Error
+		if err != nil {
+			return err
 		}
 	}
-	return nil
+	return FillMissingTranslations(db)
+}
+
+func FillMissingTranslations(db *gorm.DB) error {
+	return db.Exec(`
+		UPDATE cards
+		JOIN cards AS main_cards ON cards.en_name = main_cards.en_name
+		JOIN sets ON cards.set_code = sets.code
+		SET
+			cards.es_name  = main_cards.es_name,
+			cards.fr_name  = main_cards.fr_name,
+			cards.de_name  = main_cards.de_name,
+			cards.it_name  = main_cards.it_name,
+			cards.pt_name  = main_cards.pt_name,
+			cards.ja_name  = main_cards.ja_name,
+			cards.ko_name  = main_cards.ko_name,
+			cards.ru_name  = main_cards.ru_name,
+			cards.zhs_name = main_cards.zhs_name,
+			cards.zht_name = main_cards.zht_name
+		WHERE
+		  main_cards.set_code = sets.parent_code
+	`).Error
 }
 
 // PRIVATE types
@@ -253,7 +275,7 @@ func (setJson *setJsonStruct) getParentCode() (code string) {
 	} else {
 		code = setJson.Code
 	}
-	return strings.ToLower(code)
+	return code
 }
 
 type cardJsonStruct struct {
@@ -332,9 +354,10 @@ func (importer *Importer) buildSet(setJson *setJsonStruct) {
 	iconName := setJson.getIconName()
 	if _, found := importer.setCollection[setJson.Code]; !found {
 		set := &Set{
-			Name:     setJson.Name,
-			Code:     setJson.Code,
-			IconName: iconName,
+			Name:       setJson.Name,
+			Code:       setJson.Code,
+			ParentCode: setJson.getParentCode(),
+			IconName:   iconName,
 		}
 		releasedAt, err := time.Parse("2006-01-02", setJson.ReleasedAt)
 		if err == nil {
@@ -384,9 +407,6 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		printedName = fmt.Sprintf("%s // %s", cardJson.CardFaces[0].PrintedName, cardJson.CardFaces[1].PrintedName)
 	}
 
-	if !contains(card.Languages, cardJson.Lang) {
-		card.Languages = append(card.Languages, cardJson.Lang)
-	}
 	card.SetName(printedName, cardJson.Lang)
 
 	if !card.IsValid() {

@@ -51,8 +51,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, 8, len(collection))
 
 	card := collection[0]
-	langs := mtgdb.Languages{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"}
-	assert.Equal(t, langs, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -70,20 +68,20 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "受譽競爭者", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1", card.CollectorNumber)
 	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallId)
-	for _, lang := range langs {
+	for _, lang := range []string{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"} {
 		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
 		assert.False(t, os.IsNotExist(err))
-		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/isd/eld_1_%s_back.jpg", lang)))
+		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
 		assert.True(t, os.IsNotExist(err))
 	}
 
 	card = collection[1]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.True(t, card.IsToken)
@@ -101,6 +99,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "teld", card.SetCode)
 	assert.Equal(t, "teld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine Tokens", card.Set.Name)
 	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
@@ -110,7 +109,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[2]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -128,6 +126,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "ust", card.SetCode)
 	assert.Equal(t, "ust", card.Set.Code)
+	assert.Equal(t, "ust", card.Set.ParentCode)
 	assert.Equal(t, "Unstable", card.Set.Name)
 	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "ust", card.Set.IconName)
@@ -137,7 +136,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[3]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -155,6 +153,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
@@ -164,7 +163,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[4]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.False(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -182,6 +180,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "peld", card.SetCode)
 	assert.Equal(t, "peld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine Promos", card.Set.Name)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
@@ -191,7 +190,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[5]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -209,6 +207,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "peld", card.SetCode)
 	assert.Equal(t, "peld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine Promos", card.Set.Name)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
@@ -218,7 +217,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[6]
-	assert.Equal(t, mtgdb.Languages{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -236,6 +234,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "破曉護林人 // 夜幕掠食者", card.ZhtName)
 	assert.Equal(t, "isd", card.SetCode)
 	assert.Equal(t, "isd", card.Set.Code)
+	assert.Equal(t, "isd", card.Set.ParentCode)
 	assert.Equal(t, "Innistrad", card.Set.Name)
 	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "isd", card.Set.IconName)
@@ -247,7 +246,6 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[7]
-	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -265,6 +263,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.ZhtName)
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
+	assert.Equal(t, "eld", card.Set.ParentCode)
 	assert.Equal(t, "Throne of Eldraine", card.Set.Name)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "eld", card.Set.IconName)
@@ -295,9 +294,8 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "eld",
 				IconName: "eld",
 			},
-			Languages: mtgdb.Languages{"en", "it"},
-			Foil:      true,
-			NonFoil:   true,
+			Foil:    true,
+			NonFoil: true,
 		},
 		mtgdb.Card{
 			EnName:          "Acclaimed Contender",
@@ -308,9 +306,8 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "eld",
 				IconName: "eld",
 			},
-			Languages: mtgdb.Languages{"en"},
-			Foil:      true,
-			NonFoil:   true,
+			Foil:    true,
+			NonFoil: true,
 		},
 		mtgdb.Card{
 			EnName:          "Daybreak Ranger // Nightfall Predator",
@@ -321,9 +318,8 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "isd",
 				IconName: "isd",
 			},
-			Languages: mtgdb.Languages{"en", "fr"},
-			Foil:      true,
-			NonFoil:   true,
+			Foil:    true,
+			NonFoil: true,
 		},
 	}
 

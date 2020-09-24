@@ -35,7 +35,6 @@ zhs_name         # 寻水兽
 zht_name         # 尋水獸
 set_code         # eld
 collector_number # 171
-languages        # ["en","de","ru","zhs","pt","fr","it","zht","es","ko","ja"]
 foil             # 1
 non_foil         # 1
 has_back_side    # 0
