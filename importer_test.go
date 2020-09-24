@@ -1,6 +1,7 @@
 package mtgdb_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -32,6 +33,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
 	importer.DownloadAssets = true
+	importer.DownloadOnlyEnAssets = false
 	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
 	collection := importer.BuildCardsFromJson()
@@ -49,8 +51,12 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, 8, len(collection))
 
 	card := collection[0]
+	langs := mtgdb.Languages{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"}
+	assert.Equal(t, langs, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "Contendiente aclamada", card.EsName)
 	assert.Equal(t, "Concurrente acclamée", card.FrName)
@@ -69,14 +75,19 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1", card.CollectorNumber)
 	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_1.jpg"))
-	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/eld_1_back.jpg"))
-	assert.True(t, os.IsNotExist(err))
+	for _, lang := range langs {
+		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
+		assert.False(t, os.IsNotExist(err))
+		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/isd/eld_1_%s_back.jpg", lang)))
+		assert.True(t, os.IsNotExist(err))
+	}
 
 	card = collection[1]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.True(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Garruk, Cursed Huntsman Emblem", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -95,12 +106,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "19", card.CollectorNumber)
 	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[2]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "\"Rumors of My Death . . .\"", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -119,12 +133,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "ust", card.Set.IconName)
 	assert.Equal(t, "65", card.CollectorNumber)
 	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[3]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Garruk, Cursed Huntsman", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -143,12 +160,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "191", card.CollectorNumber)
 	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_191.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_191_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[4]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.False(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -167,12 +187,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1s", card.CollectorNumber)
 	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1s.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1s_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[5]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -191,12 +214,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "1p", card.CollectorNumber)
 	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1p.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1p_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[6]
+	assert.Equal(t, mtgdb.Languages{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.True(t, card.IsDoubleFaced)
+	assert.True(t, card.HasBackSide)
 	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", card.EnName)
 	assert.Equal(t, "Guardabosque del amanecer // Depredadora del anochecer", card.EsName)
 	assert.Equal(t, "Ranger de l'aube // Prédateur du crépuscule", card.FrName)
@@ -215,14 +241,17 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "isd", card.Set.IconName)
 	assert.Equal(t, "176", card.CollectorNumber)
 	assert.Equal(t, "25b54a1d-e201-453b-9173-b04e06ee6fb7", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_back.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en_back.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
 	card = collection[7]
+	assert.Equal(t, mtgdb.Languages{"en"}, card.Languages)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
-	assert.False(t, card.IsDoubleFaced)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -241,7 +270,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "eld", card.Set.IconName)
 	assert.Equal(t, "334", card.CollectorNumber)
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334.jpg"))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 }
 
@@ -266,6 +295,9 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "eld",
 				IconName: "eld",
 			},
+			Languages: mtgdb.Languages{"en", "it"},
+			Foil:      true,
+			NonFoil:   true,
 		},
 		mtgdb.Card{
 			EnName:          "Acclaimed Contender",
@@ -276,6 +308,9 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "eld",
 				IconName: "eld",
 			},
+			Languages: mtgdb.Languages{"en"},
+			Foil:      true,
+			NonFoil:   true,
 		},
 		mtgdb.Card{
 			EnName:          "Daybreak Ranger // Nightfall Predator",
@@ -286,6 +321,9 @@ func TestBulkInsert(t *testing.T) {
 				Code:     "isd",
 				IconName: "isd",
 			},
+			Languages: mtgdb.Languages{"en", "fr"},
+			Foil:      true,
+			NonFoil:   true,
 		},
 	}
 

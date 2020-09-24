@@ -14,12 +14,12 @@ func SetImagesDir(imagesDir string) string {
 	return filepath.Join(imagesDir, "sets")
 }
 
-func CardImagePath(imagesDir, setCode, collectorNumber string, backImage bool) string {
+func CardImagePath(imagesDir, setCode, collectorNumber, locale string, backImage bool) string {
 	var fileName string
 	if !backImage {
-		fileName = fmt.Sprintf("%s_%s.jpg", setCode, collectorNumber)
+		fileName = fmt.Sprintf("%s_%s_%s.jpg", setCode, collectorNumber, locale)
 	} else {
-		fileName = fmt.Sprintf("%s_%s_back.jpg", setCode, collectorNumber)
+		fileName = fmt.Sprintf("%s_%s_%s_back.jpg", setCode, collectorNumber, locale)
 	}
 	return strings.ToLower(filepath.Join(CardImagesDir(imagesDir), setCode, fileName))
 }

@@ -28,6 +28,7 @@ type Importer struct {
 	OnlyTheseSetCodes        []string
 	ForceDownloadData        bool
 	DownloadAssets           bool
+	DownloadOnlyEnAssets     bool
 	ForceDownloadOlderAssets bool
 	ForceDownloadAssets      bool
 	ImageType                string
@@ -49,6 +50,7 @@ func NewImporter(dataDir string) *Importer {
 		ImagesDir:                filepath.Join(dataDir, "images"),
 		ForceDownloadData:        false,
 		DownloadAssets:           true,
+		DownloadOnlyEnAssets:     true,
 		ForceDownloadOlderAssets: false,
 		ForceDownloadAssets:      false,
 		ImageType:                "normal",
@@ -266,6 +268,8 @@ type cardJsonStruct struct {
 	SetName         string               `json:"set_name"`
 	SetType         string               `json:"set_type"`
 	CollectorNumber string               `json:"collector_number"`
+	Foil            bool                 `json:"foil"`
+	NonFoil         bool                 `json:"nonfoil"`
 }
 
 type imagesCardJsonStruct struct {
@@ -363,12 +367,14 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
 			IsToken:         isToken,
-			IsDoubleFaced:   isDoubleFaced(cardJson),
+			HasBackSide:     hasBackSide(cardJson),
 			Set:             importer.setCollection[cardJson.SetCode],
+			Foil:            cardJson.Foil,
+			NonFoil:         cardJson.NonFoil,
 		}
 		importer.cardCollection[key] = card
 	}
-	if importer.DownloadAssets && cardJson.Lang == "en" {
+	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
 		importer.wg.Add(1)
 		importer.bar.IncrementMax()
 		go importer.downloadCardImage(*cardJson)
@@ -376,6 +382,10 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	printedName := cardJson.PrintedName
 	if printedName == "" && len(cardJson.CardFaces) > 1 {
 		printedName = fmt.Sprintf("%s // %s", cardJson.CardFaces[0].PrintedName, cardJson.CardFaces[1].PrintedName)
+	}
+
+	if !contains(card.Languages, cardJson.Lang) {
+		card.Languages = append(card.Languages, cardJson.Lang)
 	}
 	card.SetName(printedName, cardJson.Lang)
 
@@ -409,16 +419,16 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
-	if isDoubleFaced(&cardJson) {
+	if hasBackSide(&cardJson) {
 		imageUrl := cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, false)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, false)
 		importer.downloadImage(imageUrl, filePath)
 		imageUrl = cardJson.CardFaces[1].ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath = CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, true)
+		filePath = CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, true)
 		importer.downloadImage(imageUrl, filePath)
 	} else {
 		imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, false)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, false)
 		importer.downloadImage(imageUrl, filePath)
 	}
 	importer.bar.Increment()
@@ -433,7 +443,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 	}
 }
 
-func isDoubleFaced(cardJson *cardJsonStruct) bool {
+func hasBackSide(cardJson *cardJsonStruct) bool {
 	return len(cardJson.CardFaces) > 1 && cardJson.CardFaces[0].ImageUris != (imagesCardJsonStruct{}) && cardJson.CardFaces[1].ImageUris != (imagesCardJsonStruct{})
 }
 

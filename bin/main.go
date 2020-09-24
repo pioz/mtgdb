@@ -15,19 +15,23 @@ import (
 )
 
 func init() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
-	var forceDownloadData, skipDownloadAssets, forceDownloadOlderAssets, help bool
+	var forceDownloadData, skipDownloadAssets, forceDownloadOlderAssets, downloadOnlyEnAssets, help bool
 	var downloadConcurrency int
 	var setsString string
 	flag.BoolVar(&forceDownloadData, "f", false, "Update Scryfall database")
 	flag.BoolVar(&skipDownloadAssets, "skip-assets", false, "Skip download of set and card images")
 	flag.BoolVar(&forceDownloadOlderAssets, "ff", false, "Force re-download of card images, but only if the modified date is older")
+	flag.BoolVar(&downloadOnlyEnAssets, "en", true, "Download card images only in EN language")
 	flag.IntVar(&downloadConcurrency, "download-concurrency", 0, "Set max download concurrency")
-	flag.BoolVar(&help, "h", false, "Print this help")
 	flag.StringVar(&setsString, "only", "", "Import some sets (es: -only eld,war)")
+	flag.BoolVar(&help, "h", false, "Print this help")
 	flag.Parse()
 	if help {
 		flag.Usage()
@@ -45,6 +49,7 @@ func main() {
 	importer.ForceDownloadData = forceDownloadData
 	importer.DownloadAssets = !skipDownloadAssets
 	importer.ForceDownloadOlderAssets = forceDownloadOlderAssets
+	importer.DownloadOnlyEnAssets = downloadOnlyEnAssets
 	if setsString != "" && len(sets) > 0 {
 		importer.OnlyTheseSetCodes = sets
 	}
