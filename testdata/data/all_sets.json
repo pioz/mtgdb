@@ -87,6 +87,27 @@
       "block_code": "isd",
       "block": "Innistrad",
       "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/isd.svg?1600660800"
+    },
+    {
+      "object": "set",
+      "id": "ee044f0b-e101-4ead-8d0e-aa510aad4277",
+      "code": "war",
+      "mtgo_code": "war",
+      "arena_code": "war",
+      "tcgplayer_id": 2418,
+      "name": "War of the Spark",
+      "uri": "https://api.scryfall.com/sets/ee044f0b-e101-4ead-8d0e-aa510aad4277",
+      "scryfall_uri": "https://scryfall.com/sets/war",
+      "search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Awar&unique=prints",
+      "released_at": "2019-05-03",
+      "set_type": "expansion",
+      "card_count": 311,
+      "digital": false,
+      "nonfoil_only": false,
+      "foil_only": false,
+      "block_code": "grn",
+      "block": "Guilds of Ravnica",
+      "icon_svg_uri": "https://c2.scryfall.com/file/scryfall-symbols/sets/war.svg?1600660800"
     }
   ]
 }

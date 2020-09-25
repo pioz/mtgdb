@@ -33,9 +33,10 @@ type Importer struct {
 	ForceDownloadAssets      bool
 	ImageType                string
 
-	cardCollection     map[string]*Card
-	setCollection      map[string]*Set
-	setIconsDownloaded map[string]struct{}
+	cardCollection        map[string]*Card
+	setCollection         map[string]*Set
+	setIconsDownloaded    map[string]struct{}
+	notEnImagesToDownload map[string]*cardJsonStruct
 
 	errorsChan          chan error
 	wg                  sync.WaitGroup
@@ -95,6 +96,7 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	if importer.DownloadAssets {
 		createDirIfNotExist(SetImagesDir(importer.ImagesDir))
 		importer.setIconsDownloaded = make(map[string]struct{})
+		importer.notEnImagesToDownload = make(map[string]*cardJsonStruct)
 	}
 
 	setsJson := setsJsonStruct{}
@@ -129,11 +131,17 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 		importer.buildCard(&cardJson)
 	}
 
-	waitErrors(&importer.wg, importer.errorsChan)
-	close(importer.errorsChan)
 	if importer.DownloadAssets {
+		for _, cardJson := range importer.notEnImagesToDownload {
+			importer.wg.Add(1)
+			importer.bar.IncrementMax()
+			go importer.downloadCardImage(*cardJson, "en")
+		}
 		importer.bar.Finishln()
 	}
+
+	waitErrors(&importer.wg, importer.errorsChan)
+	close(importer.errorsChan)
 	cards := make([]Card, 0, len(importer.cardCollection))
 	for _, card := range importer.cardCollection {
 		cards = append(cards, *card)
@@ -396,11 +404,15 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			NonFoil:         cardJson.NonFoil,
 		}
 		importer.cardCollection[key] = card
+		if importer.DownloadAssets {
+			importer.notEnImagesToDownload[key] = cardJson
+		}
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
 		importer.wg.Add(1)
 		importer.bar.IncrementMax()
-		go importer.downloadCardImage(*cardJson)
+		go importer.downloadCardImage(*cardJson, cardJson.Lang)
+		delete(importer.notEnImagesToDownload, key)
 	}
 	printedName := cardJson.PrintedName
 	if printedName == "" && len(cardJson.CardFaces) > 1 {
@@ -436,19 +448,19 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 }
 
 // cardJson must be a copy (not a pointer) cause this method is called in a go routine
-func (importer *Importer) downloadCardImage(cardJson cardJsonStruct) {
+func (importer *Importer) downloadCardImage(cardJson cardJsonStruct, saveAsLang string) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
 	if hasBackSide(&cardJson) {
 		imageUrl := cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, false)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
 		importer.downloadImage(imageUrl, filePath)
 		imageUrl = cardJson.CardFaces[1].ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath = CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, true)
+		filePath = CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, true)
 		importer.downloadImage(imageUrl, filePath)
 	} else {
 		imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
-		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, cardJson.Lang, false)
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
 		importer.downloadImage(imageUrl, filePath)
 	}
 	importer.bar.Increment()

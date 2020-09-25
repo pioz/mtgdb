@@ -47,8 +47,10 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/ust.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/war.jpg"))
+	assert.False(t, os.IsNotExist(err))
 
-	assert.Equal(t, 8, len(collection))
+	assert.Equal(t, 9, len(collection))
 
 	card := collection[0]
 	assert.True(t, card.Foil)
@@ -220,6 +222,35 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
+	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
+	assert.Equal(t, "", card.EsName)
+	assert.Equal(t, "", card.FrName)
+	assert.Equal(t, "", card.DeName)
+	assert.Equal(t, "", card.ItName)
+	assert.Equal(t, "", card.PtName)
+	assert.Equal(t, "世界を揺るがす者、ニッサ", card.JaName)
+	assert.Equal(t, "", card.KoName)
+	assert.Equal(t, "", card.RuName)
+	assert.Equal(t, "", card.ZhsName)
+	assert.Equal(t, "", card.ZhtName)
+	assert.Equal(t, "war", card.SetCode)
+	assert.Equal(t, "war", card.Set.Code)
+	assert.Equal(t, "war", card.Set.ParentCode)
+	assert.Equal(t, "War of the Spark", card.Set.Name)
+	assert.Equal(t, "2019-05-03 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "war", card.Set.IconName)
+	assert.Equal(t, "169★", card.CollectorNumber)
+	assert.Equal(t, "25d63632-c019-4f34-926a-42f829a4665c", card.ScryfallId)
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_ja.jpg"))
+	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))
+	assert.True(t, os.IsNotExist(err))
+
+	card = collection[7]
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.IsToken)
 	assert.True(t, card.HasBackSide)
 	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", card.EnName)
 	assert.Equal(t, "Guardabosque del amanecer // Depredadora del anochecer", card.EsName)
@@ -245,7 +276,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en_back.jpg"))
 	assert.False(t, os.IsNotExist(err))
 
-	card = collection[7]
+	card = collection[8]
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.IsToken)
@@ -271,6 +302,28 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+}
+
+func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
+	defer os.RemoveAll(TEMP_DIR)
+
+	importer := mtgdb.NewImporter(filepath.Join(FIXTURES_PATH, "data"))
+	importer.DownloadAssets = true
+	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
+
+	collection := importer.BuildCardsFromJson()
+	sort.Slice(collection, func(i, j int) bool {
+		return collection[i].ScryfallId > collection[j].ScryfallId
+	})
+
+	// Index 6 is Nissa Japan
+	card := collection[6]
+	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
+	assert.Equal(t, "世界を揺るがす者、ニッサ", card.JaName)
+	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))
+	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_ja.jpg"))
+	assert.True(t, os.IsNotExist(err))
 }
 
 func TestBulkInsert(t *testing.T) {

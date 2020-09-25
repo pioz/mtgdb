@@ -2855,5 +2855,116 @@
       "edhrec": "https://edhrec.com/route/?cc=Garruk%2C+Cursed+Huntsman",
       "mtgtop8": "https://mtgtop8.com/search?MD_check=1&SB_check=1&cards=Garruk%2C+Cursed+Huntsman"
     }
+  },
+
+  {
+    "object": "card",
+    "id": "25d63632-c019-4f34-926a-42f829a4665c",
+    "oracle_id": "5aa3abf1-d56b-4f42-8c84-7e5a2c15ee0f",
+    "multiverse_ids": [],
+    "tcgplayer_id": 189017,
+    "name": "Nissa, Who Shakes the World",
+    "printed_name": "世界を揺るがす者、ニッサ",
+    "lang": "ja",
+    "released_at": "2019-05-03",
+    "uri": "https://api.scryfall.com/cards/25d63632-c019-4f34-926a-42f829a4665c",
+    "scryfall_uri": "https://scryfall.com/card/war/169%E2%98%85/ja/%E4%B8%96%E7%95%8C%E3%82%92%E6%8F%BA%E3%82%8B%E3%81%8C%E3%81%99%E8%80%85%E3%80%81%E3%83%8B%E3%83%83%E3%82%B5?utm_source=api",
+    "layout": "normal",
+    "highres_image": true,
+    "image_uris": {
+      "small": "https://c1.scryfall.com/file/scryfall-cards/small/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714",
+      "normal": "https://c1.scryfall.com/file/scryfall-cards/normal/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714",
+      "large": "https://c1.scryfall.com/file/scryfall-cards/large/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714",
+      "png": "https://c1.scryfall.com/file/scryfall-cards/png/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.png?1580443714",
+      "art_crop": "https://c1.scryfall.com/file/scryfall-cards/art_crop/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714",
+      "border_crop": "https://c1.scryfall.com/file/scryfall-cards/border_crop/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714"
+    },
+    "mana_cost": "{3}{G}{G}",
+    "cmc": 5.0,
+    "type_line": "Legendary Planeswalker — Nissa",
+    "printed_type_line": "伝説のプレインズウォーカー — ニッサ",
+    "oracle_text": "Whenever you tap a Forest for mana, add an additional {G}.\n+1: Put three +1/+1 counters on up to one target noncreature land you control. Untap it. It becomes a 0/0 Elemental creature with vigilance and haste that's still a land.\n−8: You get an emblem with \"Lands you control have indestructible.\" Search your library for any number of Forest cards, put them onto the battlefield tapped, then shuffle your library.",
+    "printed_text": "あなたがマナを引き出す目的で森をタップするたび、追加で{G}を加える。\n+1：あなたがコントロールしていてクリーチャーでない土地最大１つを対象とし、それの上に＋１/＋１カウンターを３個置く。それをアンタップする。それは警戒と速攻を持つ０/０のエレメンタル・クリーチャーになる。それは土地でもある。\n-8：あなたは「あなたがコントロールしている土地は破壊不能を持つ。」を持つ紋章を得る。あなたのライブラリーから森・カード望む枚数を探し、それらをタップ状態で戦場に出し、その後あなたのライブラリーを切り直す。",
+    "loyalty": "5",
+    "colors": [
+      "G"
+    ],
+    "color_identity": [
+      "G"
+    ],
+    "keywords": [],
+    "produced_mana": [
+      "G"
+    ],
+    "legalities": {
+      "standard": "not_legal",
+      "future": "not_legal",
+      "historic": "legal",
+      "pioneer": "legal",
+      "modern": "legal",
+      "legacy": "legal",
+      "pauper": "not_legal",
+      "vintage": "legal",
+      "penny": "not_legal",
+      "commander": "legal",
+      "brawl": "not_legal",
+      "duel": "legal",
+      "oldschool": "not_legal"
+    },
+    "games": [
+      "arena",
+      "paper",
+      "mtgo"
+    ],
+    "reserved": false,
+    "foil": true,
+    "nonfoil": true,
+    "oversized": false,
+    "promo": false,
+    "reprint": false,
+    "variation": false,
+    "set": "war",
+    "set_name": "War of the Spark",
+    "set_type": "expansion",
+    "set_uri": "https://api.scryfall.com/sets/ee044f0b-e101-4ead-8d0e-aa510aad4277",
+    "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Awar&unique=prints",
+    "scryfall_set_uri": "https://scryfall.com/sets/war?utm_source=api",
+    "rulings_uri": "https://api.scryfall.com/cards/25d63632-c019-4f34-926a-42f829a4665c/rulings",
+    "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3A5aa3abf1-d56b-4f42-8c84-7e5a2c15ee0f&unique=prints",
+    "collector_number": "169★",
+    "digital": false,
+    "rarity": "rare",
+    "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
+    "artist": "Hitowa",
+    "artist_ids": [
+      "8601f23d-d64c-45cb-9129-a65e8caf402c"
+    ],
+    "illustration_id": "f73fa993-cb06-41be-a945-34aec8f4e114",
+    "border_color": "black",
+    "frame": "2015",
+    "full_art": false,
+    "textless": false,
+    "booster": true,
+    "story_spotlight": false,
+    "promo_types": [
+      "jpwalker"
+    ],
+    "edhrec_rank": 825,
+    "prices": {
+      "usd": "15.93",
+      "usd_foil": "260.80",
+      "eur": null,
+      "tix": null
+    },
+    "related_uris": {
+      "tcgplayer_decks": "https://decks.tcgplayer.com/magic/deck/search?contains=Nissa%2C+Who+Shakes+the+World&page=1&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "edhrec": "https://edhrec.com/route/?cc=Nissa%2C+Who+Shakes+the+World",
+      "mtgtop8": "https://mtgtop8.com/search?MD_check=1&SB_check=1&cards=Nissa%2C+Who+Shakes+the+World"
+    },
+    "purchase_uris": {
+      "tcgplayer": "https://shop.tcgplayer.com/product/productsearch?id=189017&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Search?referrer=scryfall&searchString=Nissa%2C+Who+Shakes+the+World&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+      "cardhoarder": "https://www.cardhoarder.com/cards?affiliate_id=scryfall&data%5Bsearch%5D=Nissa%2C+Who+Shakes+the+World&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+    }
   }
 ]
