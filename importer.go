@@ -225,7 +225,8 @@ func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize in
 			return err
 		}
 	}
-	return FillMissingTranslations(db)
+	// return FillMissingTranslations(db)
+	return nil
 }
 
 func FillMissingTranslations(db *gorm.DB) error {
