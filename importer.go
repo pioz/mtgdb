@@ -413,7 +413,9 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		importer.wg.Add(1)
 		importer.bar.IncrementMax()
 		go importer.downloadCardImage(*cardJson, cardJson.Lang)
-		delete(importer.notEnImagesToDownload, key)
+		if cardJson.Lang == "en" {
+			delete(importer.notEnImagesToDownload, key)
+		}
 	}
 	printedName := cardJson.PrintedName
 	if printedName == "" && len(cardJson.CardFaces) > 1 {

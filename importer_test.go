@@ -245,7 +245,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_ja.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))
-	assert.True(t, os.IsNotExist(err))
+	assert.False(t, os.IsNotExist(err))
 
 	card = collection[7]
 	assert.True(t, card.Foil)
