@@ -470,11 +470,14 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct, saveAsLang 
 }
 
 func (importer *Importer) downloadImage(imageUrl, filePath string) {
-	if stat, err := os.Stat(filePath); importer.ForceDownloadAssets || importer.ForceDownloadOlderAssets || os.IsNotExist(err) {
-		err = downloadFile(filePath, imageUrl, stat)
-		if err != nil {
-			importer.errorsChan <- err
-		}
+	var downloadErr error
+	if importer.ForceDownloadAssets {
+		downloadErr = downloadFile(filePath, imageUrl, nil)
+	} else if stat, err := os.Stat(filePath); importer.ForceDownloadOlderAssets || os.IsNotExist(err) {
+		downloadErr = downloadFile(filePath, imageUrl, stat)
+	}
+	if downloadErr != nil {
+		importer.errorsChan <- downloadErr
 	}
 }
 

@@ -338,7 +338,7 @@ func TestBulkInsert(t *testing.T) {
 	mtgdb.AutoMigrate(db)
 
 	cards := []mtgdb.Card{
-		mtgdb.Card{
+		{
 			EnName:          "Gilded Goose",
 			CollectorNumber: "160",
 			SetCode:         "eld",
@@ -349,8 +349,7 @@ func TestBulkInsert(t *testing.T) {
 			},
 			Foil:    true,
 			NonFoil: true,
-		},
-		mtgdb.Card{
+		}, {
 			EnName:          "Acclaimed Contender",
 			CollectorNumber: "1",
 			SetCode:         "eld",
@@ -361,8 +360,7 @@ func TestBulkInsert(t *testing.T) {
 			},
 			Foil:    true,
 			NonFoil: true,
-		},
-		mtgdb.Card{
+		}, {
 			EnName:          "Daybreak Ranger // Nightfall Predator",
 			CollectorNumber: "176",
 			SetCode:         "isd",
