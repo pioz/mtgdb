@@ -410,18 +410,8 @@ func TestDownloadFile(t *testing.T) {
 	defer os.RemoveAll(TEMP_DIR)
 	url := "https://c1.scryfall.com/file/scryfall-cards/normal/front/5/d/5d10b752-d9cb-419d-a5c4-d4ee1acb655e.jpg?1562736365"
 
-	err = mtgdb.DownloadFile(file, url, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = os.Stat(file)
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.False(t, os.IsNotExist(err))
-
-	olderTime, _ := time.Parse(time.RFC3339, "1990-01-01T00:00:00.00Z")
-	err = os.Chtimes(file, olderTime, olderTime)
+	// Test download file
+	err = mtgdb.DownloadFile(file, url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -429,7 +419,43 @@ func TestDownloadFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = mtgdb.DownloadFile(file, url, stat)
+	assert.False(t, os.IsNotExist(err))
+
+	// Test download file with different SHA1
+	err = mtgdb.DownloadFileWhenChanged(file, url, nil, "differentSHA1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	currentFileTime := stat.ModTime()
+	stat, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, currentFileTime.Before(stat.ModTime()))
+
+	// Test download file with same SHA1
+	err = mtgdb.DownloadFileWhenChanged(file, url, nil, "8b2ee43e87867e87a8fca7bfff0c7498f1d1fea8")
+	if err != nil {
+		t.Fatal(err)
+	}
+	currentFileTime = stat.ModTime()
+	stat, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, currentFileTime.Equal(stat.ModTime()))
+
+	// Test download file with older time
+	olderTime, _ := time.Parse(time.RFC3339, "1990-01-01T00:00:00.00Z")
+	err = os.Chtimes(file, olderTime, olderTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err = os.Stat(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -439,6 +465,7 @@ func TestDownloadFile(t *testing.T) {
 	}
 	assert.False(t, olderTime.Equal(stat.ModTime()))
 
+	// Test download file with newer time
 	newerTime, _ := time.Parse(time.RFC3339, "2120-06-01T00:00:00.00Z")
 	err = os.Chtimes(file, newerTime, newerTime)
 	if err != nil {
@@ -448,7 +475,7 @@ func TestDownloadFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = mtgdb.DownloadFile(file, url, stat)
+	err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
 	if err != nil {
 		t.Fatal(err)
 	}

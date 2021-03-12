@@ -2,6 +2,7 @@ package mtgdb
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ type Importer struct {
 	DownloadAssets           bool
 	DownloadOnlyEnAssets     bool
 	ForceDownloadOlderAssets bool
+	ForceDownloadDiffSha1    bool
 	ForceDownloadAssets      bool
 	ImageType                string
 
@@ -53,6 +55,7 @@ func NewImporter(dataDir string) *Importer {
 		DownloadAssets:           true,
 		DownloadOnlyEnAssets:     true,
 		ForceDownloadOlderAssets: false,
+		ForceDownloadDiffSha1:    false,
 		ForceDownloadAssets:      false,
 		ImageType:                "normal",
 		errorsChan:               make(chan error, 10),
@@ -70,7 +73,7 @@ func (importer *Importer) DownloadData() error {
 	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
 	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
 	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
-		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets", nil)
+		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
 			return err
 		}
@@ -80,7 +83,7 @@ func (importer *Importer) DownloadData() error {
 		if err != nil {
 			return err
 		}
-		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl, nil)
+		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl)
 		if err != nil {
 			return err
 		}
@@ -437,7 +440,7 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 	svgFilePath := filepath.Join(SetImagesDir(importer.ImagesDir), fmt.Sprintf("%s.svg", iconName))
 	setIconFilePath := SetImagePath(importer.ImagesDir, iconName)
 	if _, err := os.Stat(setIconFilePath); importer.ForceDownloadAssets || os.IsNotExist(err) {
-		err := downloadFile(svgFilePath, setJson.IconSvgUri, nil)
+		err := downloadFile(svgFilePath, setJson.IconSvgUri)
 		if err != nil {
 			importer.errorsChan <- err
 			return
@@ -472,12 +475,34 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct, saveAsLang 
 func (importer *Importer) downloadImage(imageUrl, filePath string) {
 	var downloadErr error
 	if importer.ForceDownloadAssets {
-		downloadErr = downloadFile(filePath, imageUrl, nil)
-	} else if stat, err := os.Stat(filePath); importer.ForceDownloadOlderAssets || os.IsNotExist(err) {
-		downloadErr = downloadFile(filePath, imageUrl, stat)
+		downloadErr = downloadFile(filePath, imageUrl)
+		if downloadErr != nil {
+			importer.errorsChan <- downloadErr
+		}
+		return
 	}
-	if downloadErr != nil {
-		importer.errorsChan <- downloadErr
+
+	stat, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		downloadErr = downloadFile(filePath, imageUrl)
+		if downloadErr != nil {
+			importer.errorsChan <- downloadErr
+		}
+		return
+	}
+
+	if importer.ForceDownloadOlderAssets || importer.ForceDownloadDiffSha1 {
+		if !importer.ForceDownloadOlderAssets {
+			stat = nil
+		}
+		sha1 := ""
+		if importer.ForceDownloadDiffSha1 {
+			sha1 = sha1sum(filePath)
+		}
+		downloadErr = downloadFileWhenChanged(filePath, imageUrl, stat, sha1)
+		if downloadErr != nil {
+			importer.errorsChan <- downloadErr
+		}
 	}
 }
 
@@ -485,22 +510,49 @@ func hasBackSide(cardJson *cardJsonStruct) bool {
 	return len(cardJson.CardFaces) > 1 && cardJson.CardFaces[0].ImageUris != (imagesCardJsonStruct{}) && cardJson.CardFaces[1].ImageUris != (imagesCardJsonStruct{})
 }
 
-func downloadFile(filepath, url string, stat os.FileInfo) error {
-	return retryOnError(3, 100*time.Millisecond, func() error {
-		if stat != nil {
-			resp, err := http.Head(url)
-			if err != nil {
-				return err
-			}
-			if resp.StatusCode != 200 {
-				return httpError(url, resp.StatusCode)
-			}
-
-			if !remoteFileIsUpdated(resp.Header, stat.ModTime()) {
-				return nil
-			}
+func getResponseHeader(url string) (http.Header, error) {
+	var (
+		resp *http.Response
+		err  error
+	)
+	retryErr := retryOnError(3, 100*time.Millisecond, func() error {
+		resp, err = http.Head(url)
+		if err != nil {
+			return err
 		}
+		if resp.StatusCode != 200 {
+			return httpError(url, resp.StatusCode)
+		}
+		return nil
+	})
+	return resp.Header, retryErr
+}
 
+func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string) error {
+	header, err := getResponseHeader(url)
+	if err != nil {
+		return err
+	}
+
+	reDownloadReasons := []string{}
+	if stat != nil && remoteFileIsNewer(header, stat.ModTime()) {
+		reDownloadReasons = append(reDownloadReasons, "remote timestamp is newer")
+	}
+
+	if sha1 != "" && remoteFileHasDiffSha1(header, sha1) {
+		reDownloadReasons = append(reDownloadReasons, "remote sha1 is changed")
+	}
+
+	if len(reDownloadReasons) == 0 {
+		return nil
+	}
+
+	log.Printf("Force re-download of image file '%s': %s\n", filepath, strings.Join(reDownloadReasons, " and "))
+	return downloadFile(filepath, url)
+}
+
+func downloadFile(filepath, url string) error {
+	return retryOnError(3, 100*time.Millisecond, func() error {
 		resp, err := http.Get(url)
 		if err != nil {
 			return err
@@ -521,7 +573,7 @@ func downloadFile(filepath, url string, stat os.FileInfo) error {
 	})
 }
 
-func remoteFileIsUpdated(header http.Header, fileModTime time.Time) bool {
+func remoteFileIsNewer(header http.Header, fileModTime time.Time) bool {
 	lastModified := header.Get("last-modified")
 	remoteLastModified, err := time.Parse(time.RFC1123, lastModified)
 	if err == nil {
@@ -534,6 +586,25 @@ func remoteFileIsUpdated(header http.Header, fileModTime time.Time) bool {
 		return time.Unix(timestamp/1000.0, 0).After(fileModTime)
 	}
 	return true
+}
+
+func remoteFileHasDiffSha1(header http.Header, sha1 string) bool {
+	remoteSha1 := header.Get("x-bz-content-sha1")
+	remoteSha1 = strings.ReplaceAll(remoteSha1, "unverified:", "")
+	return remoteSha1 != sha1
+}
+
+func sha1sum(filepath string) string {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	h := sha1.New()
+	if _, err = io.Copy(h, f); err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func httpError(url string, statusCode int) error {
