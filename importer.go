@@ -136,8 +136,8 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 
 	if importer.DownloadAssets {
 		for _, cardJson := range importer.notEnImagesToDownload {
-			importer.wg.Add(1)
 			importer.bar.IncrementMax()
+			importer.wg.Add(1)
 			go importer.downloadCardImage(*cardJson, "en")
 		}
 		importer.bar.Finishln()
@@ -413,8 +413,8 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		}
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
-		importer.wg.Add(1)
 		importer.bar.IncrementMax()
+		importer.wg.Add(1)
 		go importer.downloadCardImage(*cardJson, cardJson.Lang)
 		if cardJson.Lang == "en" {
 			delete(importer.notEnImagesToDownload, key)
