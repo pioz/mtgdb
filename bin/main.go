@@ -85,7 +85,7 @@ func main() {
 	db.Model(&mtgdb.Set{}).Count(&beforeSetsCount)
 	db.Model(&mtgdb.Card{}).Count(&beforeCardsCount)
 	start := time.Now()
-	collection, downloadedImages := importer.BuildCardsFromJson()
+	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	err = mtgdb.BulkInsert(db, collection)
 	if err != nil {
 		log.Println(err)
@@ -93,5 +93,5 @@ func main() {
 	log.Printf("Processed %d cards in %s\n", len(collection), time.Since(start))
 	db.Model(&mtgdb.Set{}).Count(&afterSetsCount)
 	db.Model(&mtgdb.Card{}).Count(&afterCardsCount)
-	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImages)
+	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImagesCount)
 }

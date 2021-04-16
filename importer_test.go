@@ -37,7 +37,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	importer.DownloadOnlyEnAssets = false
 	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
-	collection, downloadedImages := importer.BuildCardsFromJson()
+	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
@@ -52,7 +52,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	assert.Equal(t, 9, len(collection))
-	assert.Equal(t, uint32(42), downloadedImages)
+	assert.Equal(t, uint32(42), downloadedImagesCount)
 
 	card := collection[0]
 	assert.True(t, card.Foil)
@@ -313,12 +313,12 @@ func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
 	importer.DownloadAssets = true
 	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
-	collection, downloadedImages := importer.BuildCardsFromJson()
+	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
 
-	assert.Equal(t, uint32(11), downloadedImages)
+	assert.Equal(t, uint32(11), downloadedImagesCount)
 	// Index 6 is Nissa Japan
 	card := collection[6]
 	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)

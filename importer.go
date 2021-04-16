@@ -40,7 +40,7 @@ type Importer struct {
 	setCollection         map[string]*Set
 	setIconsDownloaded    map[string]struct{}
 	notEnImagesToDownload map[string]*cardJsonStruct
-	downloadedImages      uint32
+	downloadedImagesCount uint32
 
 	errorsChan          chan error
 	wg                  sync.WaitGroup
@@ -96,7 +96,7 @@ func (importer *Importer) DownloadData() error {
 func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	defer removeAllFilesByExtension(SetImagesDir(importer.ImagesDir), "svg")
 
-	importer.downloadedImages = 0
+	importer.downloadedImagesCount = 0
 	importer.cardCollection = make(map[string]*Card)
 	importer.setCollection = make(map[string]*Set)
 	if importer.DownloadAssets {
@@ -152,7 +152,7 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	for _, card := range importer.cardCollection {
 		cards = append(cards, *card)
 	}
-	return cards, importer.downloadedImages
+	return cards, importer.downloadedImagesCount
 }
 
 func BulkInsert(db *gorm.DB, cards []Card) error {
@@ -422,7 +422,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
 		} else {
-			atomic.AddUint32(&importer.downloadedImages, 1)
+			atomic.AddUint32(&importer.downloadedImagesCount, 1)
 		}
 		return
 	}
@@ -433,7 +433,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
 		} else {
-			atomic.AddUint32(&importer.downloadedImages, 1)
+			atomic.AddUint32(&importer.downloadedImagesCount, 1)
 		}
 		return
 	}
@@ -450,7 +450,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
 		} else if downloaded {
-			atomic.AddUint32(&importer.downloadedImages, 1)
+			atomic.AddUint32(&importer.downloadedImagesCount, 1)
 		}
 	}
 }
