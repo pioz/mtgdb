@@ -37,7 +37,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	importer.DownloadOnlyEnAssets = false
 	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
-	collection := importer.BuildCardsFromJson()
+	collection, downloadedImages := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
@@ -52,6 +52,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	assert.Equal(t, 9, len(collection))
+	assert.Equal(t, uint32(42), downloadedImages)
 
 	card := collection[0]
 	assert.True(t, card.Foil)
@@ -312,11 +313,12 @@ func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
 	importer.DownloadAssets = true
 	importer.ImagesDir = filepath.Join(TEMP_DIR, "images")
 
-	collection := importer.BuildCardsFromJson()
+	collection, downloadedImages := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
 		return collection[i].ScryfallId > collection[j].ScryfallId
 	})
 
+	assert.Equal(t, uint32(11), downloadedImages)
 	// Index 6 is Nissa Japan
 	card := collection[6]
 	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
@@ -427,7 +429,7 @@ func TestDownloadFile(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 
 	// Test download file with different SHA1
-	err = mtgdb.DownloadFileWhenChanged(file, url, nil, "differentSHA1")
+	downloaded, err := mtgdb.DownloadFileWhenChanged(file, url, nil, "differentSHA1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -437,9 +439,10 @@ func TestDownloadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.True(t, currentFileTime.Before(stat.ModTime()))
+	assert.True(t, downloaded)
 
 	// Test download file with same SHA1
-	err = mtgdb.DownloadFileWhenChanged(file, url, nil, "8b2ee43e87867e87a8fca7bfff0c7498f1d1fea8")
+	downloaded, err = mtgdb.DownloadFileWhenChanged(file, url, nil, "8b2ee43e87867e87a8fca7bfff0c7498f1d1fea8")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -449,6 +452,7 @@ func TestDownloadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.True(t, currentFileTime.Equal(stat.ModTime()))
+	assert.False(t, downloaded)
 
 	// Test download file with older time
 	olderTime, _ := time.Parse(time.RFC3339, "1990-01-01T00:00:00.00Z")
@@ -460,7 +464,7 @@ func TestDownloadFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
+	downloaded, err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -469,6 +473,7 @@ func TestDownloadFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.False(t, olderTime.Equal(stat.ModTime()))
+	assert.True(t, downloaded)
 
 	// Test download file with newer time
 	newerTime, _ := time.Parse(time.RFC3339, "2120-06-01T00:00:00.00Z")
@@ -480,7 +485,7 @@ func TestDownloadFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
+	downloaded, err = mtgdb.DownloadFileWhenChanged(file, url, stat, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -489,4 +494,5 @@ func TestDownloadFile(t *testing.T) {
 		panic(err)
 	}
 	assert.True(t, newerTime.Equal(stat.ModTime()))
+	assert.False(t, downloaded)
 }

@@ -2886,16 +2886,10 @@
     "oracle_text": "Whenever you tap a Forest for mana, add an additional {G}.\n+1: Put three +1/+1 counters on up to one target noncreature land you control. Untap it. It becomes a 0/0 Elemental creature with vigilance and haste that's still a land.\n−8: You get an emblem with \"Lands you control have indestructible.\" Search your library for any number of Forest cards, put them onto the battlefield tapped, then shuffle your library.",
     "printed_text": "あなたがマナを引き出す目的で森をタップするたび、追加で{G}を加える。\n+1：あなたがコントロールしていてクリーチャーでない土地最大１つを対象とし、それの上に＋１/＋１カウンターを３個置く。それをアンタップする。それは警戒と速攻を持つ０/０のエレメンタル・クリーチャーになる。それは土地でもある。\n-8：あなたは「あなたがコントロールしている土地は破壊不能を持つ。」を持つ紋章を得る。あなたのライブラリーから森・カード望む枚数を探し、それらをタップ状態で戦場に出し、その後あなたのライブラリーを切り直す。",
     "loyalty": "5",
-    "colors": [
-      "G"
-    ],
-    "color_identity": [
-      "G"
-    ],
+    "colors": ["G"],
+    "color_identity": ["G"],
     "keywords": [],
-    "produced_mana": [
-      "G"
-    ],
+    "produced_mana": ["G"],
     "legalities": {
       "standard": "not_legal",
       "future": "not_legal",
@@ -2911,11 +2905,7 @@
       "duel": "legal",
       "oldschool": "not_legal"
     },
-    "games": [
-      "arena",
-      "paper",
-      "mtgo"
-    ],
+    "games": ["arena", "paper", "mtgo"],
     "reserved": false,
     "foil": true,
     "nonfoil": true,
@@ -2936,9 +2926,7 @@
     "rarity": "rare",
     "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
     "artist": "Hitowa",
-    "artist_ids": [
-      "8601f23d-d64c-45cb-9129-a65e8caf402c"
-    ],
+    "artist_ids": ["8601f23d-d64c-45cb-9129-a65e8caf402c"],
     "illustration_id": "f73fa993-cb06-41be-a945-34aec8f4e114",
     "border_color": "black",
     "frame": "2015",
@@ -2946,9 +2934,7 @@
     "textless": false,
     "booster": true,
     "story_spotlight": false,
-    "promo_types": [
-      "jpwalker"
-    ],
+    "promo_types": ["jpwalker"],
     "edhrec_rank": 825,
     "prices": {
       "usd": "15.93",
