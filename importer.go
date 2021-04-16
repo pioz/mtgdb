@@ -13,14 +13,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/pioz/mtgdb/pb"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Importer struct {
@@ -39,6 +40,7 @@ type Importer struct {
 	setCollection         map[string]*Set
 	setIconsDownloaded    map[string]struct{}
 	notEnImagesToDownload map[string]*cardJsonStruct
+	downloadedImages      uint32
 
 	errorsChan          chan error
 	wg                  sync.WaitGroup
@@ -91,9 +93,10 @@ func (importer *Importer) DownloadData() error {
 	return nil
 }
 
-func (importer *Importer) BuildCardsFromJson() []Card {
+func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	defer removeAllFilesByExtension(SetImagesDir(importer.ImagesDir), "svg")
 
+	importer.downloadedImages = 0
 	importer.cardCollection = make(map[string]*Card)
 	importer.setCollection = make(map[string]*Set)
 	if importer.DownloadAssets {
@@ -149,17 +152,7 @@ func (importer *Importer) BuildCardsFromJson() []Card {
 	for _, card := range importer.cardCollection {
 		cards = append(cards, *card)
 	}
-	return cards
-}
-
-func AutoMigrate(db *gorm.DB) {
-	db.AutoMigrate(&Set{})
-	db.Model(&Set{}).AddUniqueIndex("idx_sets_code", "code")
-	db.Model(&Set{}).AddIndex("idx_sets_parent_code", "parent_code")
-	db.AutoMigrate(&Card{})
-	db.Model(&Card{}).AddUniqueIndex("idx_cards_set_code_collector_number_is_token", "set_code", "collector_number", "is_token")
-	db.Model(&Card{}).AddIndex("idx_cards_en_name", "en_name")
-	db.Model(&Card{}).AddForeignKey("set_code", "sets(code)", "RESTRICT", "RESTRICT")
+	return cards, importer.downloadedImages
 }
 
 func BulkInsert(db *gorm.DB, cards []Card) error {
@@ -173,63 +166,13 @@ func BulkInsert(db *gorm.DB, cards []Card) error {
 	for _, set := range sets {
 		allSets = append(allSets, *set)
 	}
-	err := bulkInsert(db, Set{}, allSets, 1000)
+
+	scope := db.Clauses(clause.OnConflict{UpdateAll: true}).Session(&gorm.Session{CreateBatchSize: 1000})
+	err := scope.Create(allSets).Error
 	if err != nil {
 		return err
 	}
-	return bulkInsert(db, Card{}, cards, 1000)
-}
-
-// Object must be an array of pointers
-func bulkInsert(db *gorm.DB, table interface{}, objects interface{}, bulkSize int) error {
-	scope := db.NewScope(table)
-	fields := scope.Fields()
-	quoted := make([]string, 0, len(fields))
-	placeholders := make([]string, 0, len(fields))
-	onUpdate := make([]string, 0, len(fields))
-	for _, field := range fields {
-		if (field.IsPrimaryKey && field.IsBlank) || field.IsIgnored || !field.IsNormal {
-			continue
-		}
-		quoted = append(quoted, field.DBName)
-		placeholders = append(placeholders, "?")
-		onUpdate = append(onUpdate, fmt.Sprintf("%s = VALUES(%s)", field.DBName, field.DBName))
-	}
-	slice := reflect.ValueOf(objects)
-	if slice.Kind() != reflect.Slice {
-		panic("BulkInsert `objects` param given a non-slice type")
-	}
-	for i := 0; i < slice.Len(); i += bulkSize {
-		allPlacehoders := make([]string, 0, bulkSize*len(fields))
-		allValues := make([]interface{}, 0, bulkSize*len(fields))
-		end := i + bulkSize
-		if end > slice.Len() {
-			end = slice.Len()
-		}
-		subslice := slice.Slice(i, end)
-		for j := 0; j < subslice.Len(); j++ {
-			obj := subslice.Index(j).Interface()
-			for _, field := range fields {
-				if (field.IsPrimaryKey && field.IsBlank) || field.IsIgnored || !field.IsNormal {
-					continue
-				}
-				allValues = append(allValues, reflect.ValueOf(obj).FieldByName(field.Name).Interface())
-			}
-			allPlacehoders = append(allPlacehoders, fmt.Sprintf("(%s)", strings.Join(placeholders, ",")))
-		}
-		query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s ON DUPLICATE KEY UPDATE %s;",
-			scope.QuotedTableName(),
-			strings.Join(quoted, ","),
-			strings.Join(allPlacehoders, ","),
-			strings.Join(onUpdate, ","),
-		)
-		err := db.Exec(query, allValues...).Error
-		if err != nil {
-			return err
-		}
-	}
-	// return FillMissingTranslations(db)
-	return nil
+	return scope.Omit("Set").Create(cards).Error
 }
 
 func FillMissingTranslations(db *gorm.DB) error {
@@ -479,6 +422,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
 		}
+		atomic.AddUint32(&importer.downloadedImages, 1)
 		return
 	}
 
@@ -488,6 +432,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
 		}
+		atomic.AddUint32(&importer.downloadedImages, 1)
 		return
 	}
 
@@ -499,9 +444,12 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		if importer.ForceDownloadDiffSha1 {
 			sha1 = sha1sum(filePath)
 		}
-		downloadErr = downloadFileWhenChanged(filePath, imageUrl, stat, sha1)
+		downloaded, downloadErr := downloadFileWhenChanged(filePath, imageUrl, stat, sha1)
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
+		}
+		if downloaded {
+			atomic.AddUint32(&importer.downloadedImages, 1)
 		}
 	}
 }
@@ -528,10 +476,10 @@ func getResponseHeader(url string) (http.Header, error) {
 	return resp.Header, retryErr
 }
 
-func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string) error {
+func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string) (bool, error) {
 	header, err := getResponseHeader(url)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	reDownloadReasons := []string{}
@@ -544,11 +492,11 @@ func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string
 	}
 
 	if len(reDownloadReasons) == 0 {
-		return nil
+		return false, nil
 	}
 
 	log.Printf("Force re-download of image file '%s': %s\n", filepath, strings.Join(reDownloadReasons, " and "))
-	return downloadFile(filepath, url)
+	return true, downloadFile(filepath, url)
 }
 
 func downloadFile(filepath, url string) error {

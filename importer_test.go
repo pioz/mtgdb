@@ -8,10 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/pioz/mtgdb"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const FIXTURES_PATH = "./testdata"
@@ -331,9 +332,13 @@ func TestBulkInsert(t *testing.T) {
 	if dbConnection == "" {
 		dbConnection = "root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True"
 	}
-	db, err := gorm.Open("mysql", dbConnection)
+	db, err := gorm.Open(mysql.Open(dbConnection), nil)
 	if err != nil {
 		panic(err)
+	}
+	db.Config.Logger = db.Config.Logger.LogMode(logger.Error)
+	if os.Getenv("DB_LOG") == "1" {
+		db.Config.Logger = db.Config.Logger.LogMode(logger.Info)
 	}
 	mtgdb.AutoMigrate(db)
 

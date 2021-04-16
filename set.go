@@ -4,11 +4,11 @@ import "time"
 
 type Set struct {
 	ID         uint   `gorm:"primary_key"`
-	Name       string `gorm:"not null"`
-	Code       string `gorm:"not null"`
-	ParentCode string `gorm:"not null"`
+	Name       string `gorm:"size:255;not null"`
+	Code       string `gorm:"size:6;not null;uniqueIndex"`
+	ParentCode string `gorm:"size:6;not null;index"`
 	ReleasedAt *time.Time
-	IconName   string `gorm:"not null"`
+	IconName   string `gorm:"size:255;not null"`
 }
 
 func (set *Set) ImagePath(dataImagesPath string) string {

@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/joho/godotenv"
 	"github.com/pioz/mtgdb"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func init() {
@@ -68,20 +69,23 @@ func main() {
 	}
 
 	log.Println("Open connection to database")
-	db, err := gorm.Open("mysql", os.Getenv("DB_CONNECTION"))
+	db, err := gorm.Open(mysql.Open(os.Getenv("DB_CONNECTION")), nil)
 	if err != nil {
 		panic("Failed to connect database")
 	}
-	// db.LogMode(true)
+	db.Config.Logger = db.Config.Logger.LogMode(logger.Error)
+	if os.Getenv("DB_LOG") == "1" {
+		db.Config.Logger = db.Config.Logger.LogMode(logger.Info)
+	}
 	log.Println("Database migration")
 	mtgdb.AutoMigrate(db)
 
 	log.Println("Filling database")
-	var beforeSetsCount, beforeCardsCount, afterSetsCount, afterCardsCount int
+	var beforeSetsCount, beforeCardsCount, afterSetsCount, afterCardsCount int64
 	db.Model(&mtgdb.Set{}).Count(&beforeSetsCount)
 	db.Model(&mtgdb.Card{}).Count(&beforeCardsCount)
 	start := time.Now()
-	collection := importer.BuildCardsFromJson()
+	collection, downloadedImages := importer.BuildCardsFromJson()
 	err = mtgdb.BulkInsert(db, collection)
 	if err != nil {
 		log.Println(err)
@@ -89,5 +93,5 @@ func main() {
 	log.Printf("Processed %d cards in %s\n", len(collection), time.Since(start))
 	db.Model(&mtgdb.Set{}).Count(&afterSetsCount)
 	db.Model(&mtgdb.Card{}).Count(&afterCardsCount)
-	log.Printf("Imported %d new sets and %d new cards\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount)
+	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImages)
 }

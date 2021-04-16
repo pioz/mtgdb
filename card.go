@@ -2,25 +2,25 @@ package mtgdb
 
 type Card struct {
 	ID              uint   `gorm:"primary_key"`
-	EnName          string `gorm:"not null"`
-	EsName          string `gorm:"not null"`
-	FrName          string `gorm:"not null"`
-	DeName          string `gorm:"not null"`
-	ItName          string `gorm:"not null"`
-	PtName          string `gorm:"not null"`
-	JaName          string `gorm:"not null"`
-	KoName          string `gorm:"not null"`
-	RuName          string `gorm:"not null"`
-	ZhsName         string `gorm:"not null"`
-	ZhtName         string `gorm:"not null"`
-	SetCode         string `gorm:"not null"`
-	Set             *Set   `gorm:"foreignkey:Code;association_foreignkey:SetCode"`
-	CollectorNumber string `gorm:"not null"`
+	EnName          string `gorm:"size:255;not null;index"`
+	EsName          string `gorm:"size:255;not null"`
+	FrName          string `gorm:"size:255;not null"`
+	DeName          string `gorm:"size:255;not null"`
+	ItName          string `gorm:"size:255;not null"`
+	PtName          string `gorm:"size:255;not null"`
+	JaName          string `gorm:"size:255;not null"`
+	KoName          string `gorm:"size:255;not null"`
+	RuName          string `gorm:"size:255;not null"`
+	ZhsName         string `gorm:"size:255;not null"`
+	ZhtName         string `gorm:"size:255;not null"`
+	SetCode         string `gorm:"size:6;not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
+	Set             *Set   `gorm:"foreignkey:SetCode;references:Code;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
+	CollectorNumber string `gorm:"size:255;not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
 	Foil            bool   `gorm:"not null"`
 	NonFoil         bool   `gorm:"not null"`
 	HasBackSide     bool   `gorm:"not null"`
-	IsToken         bool   `gorm:"not null"`
-	ScryfallId      string
+	IsToken         bool   `gorm:"not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
+	ScryfallId      string `gorm:"size:255;not null"`
 }
 
 func (card *Card) IsValid() bool {
