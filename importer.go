@@ -421,8 +421,9 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		downloadErr = downloadFile(filePath, imageUrl)
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
+		} else {
+			atomic.AddUint32(&importer.downloadedImages, 1)
 		}
-		atomic.AddUint32(&importer.downloadedImages, 1)
 		return
 	}
 
@@ -431,8 +432,9 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		downloadErr = downloadFile(filePath, imageUrl)
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
+		} else {
+			atomic.AddUint32(&importer.downloadedImages, 1)
 		}
-		atomic.AddUint32(&importer.downloadedImages, 1)
 		return
 	}
 
@@ -447,8 +449,7 @@ func (importer *Importer) downloadImage(imageUrl, filePath string) {
 		downloaded, downloadErr := downloadFileWhenChanged(filePath, imageUrl, stat, sha1)
 		if downloadErr != nil {
 			importer.errorsChan <- downloadErr
-		}
-		if downloaded {
+		} else if downloaded {
 			atomic.AddUint32(&importer.downloadedImages, 1)
 		}
 	}
