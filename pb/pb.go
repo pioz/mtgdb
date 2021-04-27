@@ -2,6 +2,7 @@ package pb
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/schollz/progressbar/v2"
@@ -22,12 +23,18 @@ func New(text string, max int) *ProgressBar {
 		progressbar.OptionThrottle(200*time.Millisecond),
 	)
 	bar.Describe(text)
-	bar.RenderBlank()
+	err := bar.RenderBlank()
+	if err != nil {
+		log.Println(err)
+	}
 	return bar
 }
 
 func (bar *ProgressBar) Increment() {
-	bar.Add(1)
+	err := bar.Add(1)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (bar *ProgressBar) IncrementMax() {
@@ -35,6 +42,9 @@ func (bar *ProgressBar) IncrementMax() {
 }
 
 func (bar *ProgressBar) Finishln() {
-	bar.Finish()
+	err := bar.Finish()
+	if err != nil {
+		log.Println(err)
+	}
 	fmt.Println("")
 }
