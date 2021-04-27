@@ -23,7 +23,7 @@ func init() {
 }
 
 func main() {
-	var forceDownloadData, skipDownloadAssets, forceDownloadOlderAssets, forceDownloadDiffSha1, forceDownloadAssets, downloadOnlyEnAssets, help bool
+	var forceDownloadData, skipDownloadAssets, forceDownloadOlderAssets, forceDownloadDiffSha1, forceDownloadAssets, downloadOnlyEnAssets, displayProgressBar, help bool
 	var downloadConcurrency int
 	var setsString string
 	flag.BoolVar(&forceDownloadData, "u", false, "Update Scryfall database")
@@ -34,6 +34,7 @@ func main() {
 	flag.BoolVar(&downloadOnlyEnAssets, "en", true, "Download card images only in EN language")
 	flag.IntVar(&downloadConcurrency, "download-concurrency", 0, "Set max download concurrency")
 	flag.StringVar(&setsString, "only", "", "Import some sets (es: -only eld,war)")
+	flag.BoolVar(&displayProgressBar, "p", false, "Display progress bar")
 	flag.BoolVar(&help, "h", false, "Print this help")
 	flag.Parse()
 	if help {
@@ -55,6 +56,7 @@ func main() {
 	importer.ForceDownloadDiffSha1 = forceDownloadDiffSha1
 	importer.ForceDownloadAssets = forceDownloadAssets
 	importer.DownloadOnlyEnAssets = downloadOnlyEnAssets
+	importer.DisplayProgressBar = displayProgressBar
 	if setsString != "" && len(sets) > 0 {
 		importer.OnlyTheseSetCodes = sets
 	}

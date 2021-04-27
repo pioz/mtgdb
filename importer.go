@@ -35,6 +35,7 @@ type Importer struct {
 	ForceDownloadDiffSha1    bool
 	ForceDownloadAssets      bool
 	ImageType                string
+	DisplayProgressBar       bool
 
 	cardCollection        map[string]*Card
 	setCollection         map[string]*Set
@@ -60,6 +61,7 @@ func NewImporter(dataDir string) *Importer {
 		ForceDownloadDiffSha1:    false,
 		ForceDownloadAssets:      false,
 		ImageType:                "normal",
+		DisplayProgressBar:       false,
 		errorsChan:               make(chan error, 10),
 		downloaderSemaphore:      make(chan struct{}, 50),
 	}
@@ -117,7 +119,7 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 		importer.buildSet(&setJson)
 	}
 
-	if importer.DownloadAssets {
+	if importer.DownloadAssets && importer.DisplayProgressBar {
 		importer.bar = pb.New("Download images", 0)
 	}
 
@@ -139,11 +141,15 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 
 	if importer.DownloadAssets {
 		for _, cardJson := range importer.notEnImagesToDownload {
-			importer.bar.IncrementMax()
+			if importer.bar != nil {
+				importer.bar.IncrementMax()
+			}
 			importer.wg.Add(1)
 			go importer.downloadCardImage(*cardJson, "en")
 		}
-		importer.bar.Finishln()
+		if importer.bar != nil {
+			importer.bar.Finishln()
+		}
 	}
 
 	waitErrors(&importer.wg, importer.errorsChan)
@@ -356,7 +362,9 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		}
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
-		importer.bar.IncrementMax()
+		if importer.bar != nil {
+			importer.bar.IncrementMax()
+		}
 		importer.wg.Add(1)
 		go importer.downloadCardImage(*cardJson, cardJson.Lang)
 		if cardJson.Lang == "en" {
@@ -412,7 +420,9 @@ func (importer *Importer) downloadCardImage(cardJson cardJsonStruct, saveAsLang 
 		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
 		importer.downloadImage(imageUrl, filePath)
 	}
-	importer.bar.Increment()
+	if importer.bar != nil {
+		importer.bar.Increment()
+	}
 }
 
 func (importer *Importer) downloadImage(imageUrl, filePath string) {

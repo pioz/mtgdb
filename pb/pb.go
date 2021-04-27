@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/schollz/progressbar/v2"
+	"github.com/schollz/progressbar/v3"
 )
 
 type ProgressBar struct {
