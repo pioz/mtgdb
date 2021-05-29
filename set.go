@@ -8,6 +8,7 @@ type Set struct {
 	Code       string `gorm:"size:6;not null;uniqueIndex"`
 	ParentCode string `gorm:"size:6;not null;index"`
 	ReleasedAt *time.Time
+	Typology   string `gorm:"size:255;not null"`
 	IconName   string `gorm:"size:255;not null"`
 }
 

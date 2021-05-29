@@ -223,6 +223,7 @@ type setJsonStruct struct {
 	ReleasedAt    string `json:"released_at"`
 	IconSvgUri    string `json:"icon_svg_uri"`
 	ParentSetCode string `json:"parent_set_code"`
+	SetType       string `json:"set_type"`
 }
 
 func (setJson *setJsonStruct) getIconName() string {
@@ -318,6 +319,7 @@ func (importer *Importer) buildSet(setJson *setJsonStruct) {
 			Name:       setJson.Name,
 			Code:       setJson.Code,
 			ParentCode: setJson.getParentCode(),
+			Typology:   setJson.SetType,
 			IconName:   iconName,
 		}
 		releasedAt, err := time.Parse("2006-01-02", setJson.ReleasedAt)
@@ -338,10 +340,10 @@ func (importer *Importer) buildSet(setJson *setJsonStruct) {
 }
 
 func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
-	isToken := false
-	if cardJson.SetType == "token" || cardJson.SetType == "memorabilia" {
-		isToken = true
-	}
+	// isToken := false
+	// if cardJson.SetType == "token" || cardJson.SetType == "memorabilia" {
+	// 	isToken = true
+	// }
 	key := fmt.Sprintf("%s-%s", cardJson.SetCode, cardJson.CollectorNumber)
 	card, found := importer.cardCollection[key]
 	if !found {
@@ -350,7 +352,6 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			EnName:          cardJson.Name,
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
-			IsToken:         isToken,
 			HasBackSide:     hasBackSide(cardJson),
 			Set:             importer.setCollection[cardJson.SetCode],
 			Foil:            cardJson.Foil,

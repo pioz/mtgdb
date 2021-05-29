@@ -14,7 +14,9 @@ fields:
 id
 name        # Throne of Eldraine
 code        # eld
+parent_code # eld
 released_at # 2019-10-04
+typology    # expansion
 icon_name   # eld
 ```
 
@@ -38,7 +40,6 @@ collector_number # 171
 foil             # 1
 non_foil         # 1
 has_back_side    # 0
-is_token         # 0
 scryfall_id      # e41cf82d-3213-47ce-a015-6e51a8b07e4f
 ```
 

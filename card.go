@@ -13,13 +13,12 @@ type Card struct {
 	RuName          string `gorm:"size:255;not null"`
 	ZhsName         string `gorm:"size:255;not null"`
 	ZhtName         string `gorm:"size:255;not null"`
-	SetCode         string `gorm:"size:6;not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
+	SetCode         string `gorm:"size:6;not null;uniqueIndex:idx_cards_set_code_collector_number"`
 	Set             *Set   `gorm:"foreignkey:SetCode;references:Code;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
-	CollectorNumber string `gorm:"size:255;not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
+	CollectorNumber string `gorm:"size:255;not null;uniqueIndex:idx_cards_set_code_collector_number"`
 	Foil            bool   `gorm:"not null"`
 	NonFoil         bool   `gorm:"not null"`
 	HasBackSide     bool   `gorm:"not null"`
-	IsToken         bool   `gorm:"not null;uniqueIndex:idx_cards_set_code_collector_number_is_token"`
 	ScryfallId      string `gorm:"size:255;not null"`
 }
 
