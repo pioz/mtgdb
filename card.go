@@ -2,7 +2,7 @@ package mtgdb
 
 type Card struct {
 	ID              uint   `gorm:"primary_key"`
-	EnName          string `gorm:"size:255;not null;index"`
+	EnName          string `gorm:"size:255;not null;index;index:idxft_cards_en_name,class:FULLTEXT"`
 	EsName          string `gorm:"size:255;not null"`
 	FrName          string `gorm:"size:255;not null"`
 	DeName          string `gorm:"size:255;not null"`
