@@ -340,10 +340,6 @@ func (importer *Importer) buildSet(setJson *setJsonStruct) {
 }
 
 func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
-	// isToken := false
-	// if cardJson.SetType == "token" || cardJson.SetType == "memorabilia" {
-	// 	isToken = true
-	// }
 	key := fmt.Sprintf("%s-%s", cardJson.SetCode, cardJson.CollectorNumber)
 	card, found := importer.cardCollection[key]
 	if !found {

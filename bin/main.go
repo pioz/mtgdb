@@ -12,8 +12,28 @@ import (
 	"github.com/pioz/mtgdb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
+
+func createCustomItems(db *gorm.DB) error {
+	scope := db.Clauses(clause.OnConflict{UpdateAll: true}).Session(&gorm.Session{CreateBatchSize: 1000})
+
+	releasedAt, err := time.Parse(time.RFC3339, "1993-08-05T00:00:00.000Z")
+	if err != nil {
+		return err
+	}
+	set := mtgdb.Set{Name: "MTG Print Extra", Code: "extra", ParentCode: "extra", ReleasedAt: &releasedAt, Typology: "extra", IconName: "default"}
+	err = scope.Create(&set).Error
+	if err != nil {
+		return err
+	}
+
+	cards := []mtgdb.Card{
+		{EnName: "Back", SetCode: "extra", CollectorNumber: "001", Foil: false, NonFoil: true, HasBackSide: false},
+	}
+	return scope.Omit("Set").Create(&cards).Error
+}
 
 func init() {
 	err := godotenv.Load()
@@ -64,6 +84,8 @@ func main() {
 		importer.SetDownloadConcurrency(downloadConcurrency)
 	}
 
+	// Start
+
 	log.Println("Downloading data")
 	err := importer.DownloadData()
 	if err != nil {
@@ -81,6 +103,11 @@ func main() {
 	}
 	log.Println("Database migration")
 	mtgdb.AutoMigrate(db)
+
+	err = createCustomItems(db)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("Filling database")
 	var beforeSetsCount, beforeCardsCount, afterSetsCount, afterCardsCount int64
