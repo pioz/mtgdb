@@ -357,6 +357,8 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		if importer.DownloadAssets {
 			importer.notEnImagesToDownload[key] = cardJson
 		}
+	} else if cardJson.Lang == "en" {
+		card.ScryfallId = cardJson.Id
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
 		if importer.bar != nil {
