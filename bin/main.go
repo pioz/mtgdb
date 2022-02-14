@@ -111,8 +111,10 @@ func main() {
 
 	log.Println("Filling database")
 	var beforeSetsCount, beforeCardsCount, afterSetsCount, afterCardsCount int64
+	var scryfallIds []string
 	db.Model(&mtgdb.Set{}).Count(&beforeSetsCount)
-	db.Model(&mtgdb.Card{}).Count(&beforeCardsCount)
+	db.Model(&mtgdb.Card{}).Pluck("scryfall_id", &scryfallIds)
+	beforeCardsCount = int64(len(scryfallIds))
 	start := time.Now()
 	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	err = mtgdb.BulkInsert(db, collection)
@@ -123,4 +125,18 @@ func main() {
 	db.Model(&mtgdb.Set{}).Count(&afterSetsCount)
 	db.Model(&mtgdb.Card{}).Count(&afterCardsCount)
 	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImagesCount)
+
+	// Remove deleted cards
+	collectionScryfallIds := make(map[string]struct{})
+	for _, card := range collection {
+		collectionScryfallIds[card.ScryfallId] = struct{}{}
+	}
+	scryfallIdsNotFound := make([]string, 0)
+	for _, scryfallId := range scryfallIds {
+		if _, found := collectionScryfallIds[scryfallId]; !found {
+			scryfallIdsNotFound = append(scryfallIdsNotFound, scryfallId)
+		}
+	}
+	db.Where("scryfall_id IN (?)", scryfallIdsNotFound).Delete(mtgdb.Card{})
+	log.Printf("Deleted %d cards\n", len(scryfallIdsNotFound))
 }
