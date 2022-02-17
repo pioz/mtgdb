@@ -133,7 +133,7 @@ func main() {
 	}
 	scryfallIdsNotFound := make([]string, 0)
 	for _, scryfallId := range scryfallIds {
-		if _, found := collectionScryfallIds[scryfallId]; !found {
+		if _, found := collectionScryfallIds[scryfallId]; !found && scryfallId != "" {
 			scryfallIdsNotFound = append(scryfallIdsNotFound, scryfallId)
 		}
 	}
