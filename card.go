@@ -1,5 +1,13 @@
 package mtgdb
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+)
+
 type Card struct {
 	ID              uint   `gorm:"primary_key"`
 	EnName          string `gorm:"size:255;not null;index;index:idxft_cards_en_name,class:FULLTEXT"`
@@ -19,7 +27,41 @@ type Card struct {
 	Foil            bool   `gorm:"not null"`
 	NonFoil         bool   `gorm:"not null"`
 	HasBackSide     bool   `gorm:"not null"`
+	ReleasedAt      *time.Time
 	ScryfallId      string `gorm:"size:255;not null"`
+	MtgoID          uint64
+	ArenaID         uint64
+	TcgplayerID     uint64
+	CardmarketID    uint64
+	Layout          string
+	ManaCost        string
+	CMC             float32
+	TypeLine        string
+	OracleText      string
+	Power           string
+	Toughness       string
+	Colors          []string  `gorm:"type:json"`
+	ColorIdentity   []string  `gorm:"type:json"`
+	Keywords        []string  `gorm:"type:json"`
+	ProducedMana    []string  `gorm:"type:json"`
+	Legalities      MapString `gorm:"type:json"`
+	Games           []string  `gorm:"type:json"`
+	Oversized       bool
+	Promo           bool
+	Reprint         bool
+	Variation       bool
+	Digital         bool
+	Rarity          string
+	Watermark       string
+	Artist          string
+	BorderColor     string
+	Frame           string
+	FrameEffects    []string `gorm:"type:json"`
+	SecurityStamp   string
+	FullArt         bool
+	Textless        bool
+	Booster         bool
+	StorySpotlight  bool
 }
 
 func (card *Card) IsValid() bool {
@@ -53,4 +95,27 @@ func (card *Card) SetName(name, language string) {
 	case "zht", "Chinese Traditional":
 		card.ZhtName = name
 	}
+}
+
+type MapString map[string]interface{}
+
+// Scan scan value into Jsonb, implements sql.Scanner interface
+func (j *MapString) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("failed to unmarshal json value:", value))
+	}
+
+	result := MapString{}
+	err := json.Unmarshal(bytes, &result)
+	*j = MapString(result)
+	return err
+}
+
+// Value return json value, implement driver.Valuer interface
+func (j MapString) Value() (driver.Value, error) {
+	if len(j) == 0 {
+		return nil, nil
+	}
+	return json.Marshal(j)
 }

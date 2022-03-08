@@ -84,6 +84,39 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
 		assert.True(t, os.IsNotExist(err))
 	}
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(0), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	assert.Equal(t, "normal", card.Layout)
+	assert.Equal(t, "{2}{W}", card.ManaCost)
+	assert.Equal(t, float32(3), card.CMC)
+	assert.Equal(t, "Creature — Human Knight", card.TypeLine)
+	assert.Equal(t, "When Acclaimed Contender enters the battlefield, if you control another Knight, look at the top five cards of your library. You may reveal a Knight, Aura, Equipment, or legendary artifact card from among them and put it into your hand. Put the rest on the bottom of your library in a random order.", card.OracleText)
+	assert.Equal(t, "3", card.Power)
+	assert.Equal(t, "3", card.Toughness)
+	assert.Equal(t, []string{"W"}, card.Colors)
+	assert.Equal(t, []string{"W"}, card.ColorIdentity)
+	assert.Equal(t, []string(nil), card.Keywords)
+	assert.Equal(t, []string(nil), card.ProducedMana)
+	assert.Equal(t, mtgdb.MapString{"brawl": "legal", "commander": "legal", "duel": "legal", "future": "legal", "historic": "legal", "legacy": "legal", "modern": "legal", "oldschool": "not_legal", "pauper": "not_legal", "penny": "legal", "pioneer": "legal", "standard": "legal", "vintage": "legal"}, card.Legalities)
+	assert.Equal(t, []string{"arena", "mtgo", "paper"}, card.Games)
+	assert.Equal(t, false, card.Oversized)
+	assert.Equal(t, false, card.Promo)
+	assert.Equal(t, false, card.Reprint)
+	assert.Equal(t, false, card.Variation)
+	assert.Equal(t, false, card.Digital)
+	assert.Equal(t, "rare", card.Rarity)
+	assert.Equal(t, "", card.Watermark)
+	assert.Equal(t, "David Gaillet", card.Artist)
+	assert.Equal(t, "black", card.BorderColor)
+	assert.Equal(t, "2015", card.Frame)
+	assert.Equal(t, []string(nil), card.FrameEffects)
+	assert.Equal(t, "", card.SecurityStamp)
+	assert.Equal(t, false, card.FullArt)
+	assert.Equal(t, false, card.Textless)
+	assert.Equal(t, true, card.Booster)
+	assert.Equal(t, false, card.StorySpotlight)
 
 	card = collection[1]
 	assert.True(t, card.Foil)
@@ -111,6 +144,39 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(0), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	assert.Equal(t, "emblem", card.Layout)
+	assert.Equal(t, "", card.ManaCost)
+	assert.Equal(t, float32(0), card.CMC)
+	assert.Equal(t, "Emblem", card.TypeLine)
+	assert.Equal(t, "Creatures you control get +3/+3 and have trample.", card.OracleText)
+	assert.Equal(t, "", card.Power)
+	assert.Equal(t, "", card.Toughness)
+	assert.Equal(t, []string{}, card.Colors)
+	assert.Equal(t, []string{}, card.ColorIdentity)
+	assert.Equal(t, []string(nil), card.Keywords)
+	assert.Equal(t, []string(nil), card.ProducedMana)
+	assert.Equal(t, mtgdb.MapString{"brawl": "not_legal", "commander": "not_legal", "duel": "not_legal", "future": "not_legal", "historic": "not_legal", "legacy": "not_legal", "modern": "not_legal", "oldschool": "not_legal", "pauper": "not_legal", "penny": "not_legal", "pioneer": "not_legal", "standard": "not_legal", "vintage": "not_legal"}, card.Legalities)
+	assert.Equal(t, []string{"paper"}, card.Games)
+	assert.Equal(t, false, card.Oversized)
+	assert.Equal(t, false, card.Promo)
+	assert.Equal(t, false, card.Reprint)
+	assert.Equal(t, false, card.Variation)
+	assert.Equal(t, false, card.Digital)
+	assert.Equal(t, "common", card.Rarity)
+	assert.Equal(t, "", card.Watermark)
+	assert.Equal(t, "Eric Deschamps", card.Artist)
+	assert.Equal(t, "black", card.BorderColor)
+	assert.Equal(t, "2015", card.Frame)
+	assert.Equal(t, []string(nil), card.FrameEffects)
+	assert.Equal(t, "", card.SecurityStamp)
+	assert.Equal(t, false, card.FullArt)
+	assert.Equal(t, false, card.Textless)
+	assert.Equal(t, false, card.Booster)
+	assert.Equal(t, false, card.StorySpotlight)
 
 	card = collection[2]
 	assert.True(t, card.Foil)
@@ -138,6 +204,39 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(153145), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	assert.Equal(t, "normal", card.Layout)
+	assert.Equal(t, "{2}{B}", card.ManaCost)
+	assert.Equal(t, float32(3), card.CMC)
+	assert.Equal(t, "Enchantment", card.TypeLine)
+	assert.Equal(t, "{3}{B}, Exile a permanent you control with a League of Dastardly Doom watermark: Return a permanent card with a League of Dastardly Doom watermark from your graveyard to the battlefield.", card.OracleText)
+	assert.Equal(t, "", card.Power)
+	assert.Equal(t, "", card.Toughness)
+	assert.Equal(t, []string{"B"}, card.Colors)
+	assert.Equal(t, []string{"B"}, card.ColorIdentity)
+	assert.Equal(t, []string(nil), card.Keywords)
+	assert.Equal(t, []string(nil), card.ProducedMana)
+	assert.Equal(t, mtgdb.MapString{"brawl": "not_legal", "commander": "not_legal", "duel": "not_legal", "future": "not_legal", "historic": "not_legal", "legacy": "not_legal", "modern": "not_legal", "oldschool": "not_legal", "pauper": "not_legal", "penny": "not_legal", "pioneer": "not_legal", "standard": "not_legal", "vintage": "not_legal"}, card.Legalities)
+	assert.Equal(t, []string{"paper"}, card.Games)
+	assert.Equal(t, false, card.Oversized)
+	assert.Equal(t, false, card.Promo)
+	assert.Equal(t, false, card.Reprint)
+	assert.Equal(t, false, card.Variation)
+	assert.Equal(t, false, card.Digital)
+	assert.Equal(t, "uncommon", card.Rarity)
+	assert.Equal(t, "leagueofdastardlydoom", card.Watermark)
+	assert.Equal(t, "Alex Konstad", card.Artist)
+	assert.Equal(t, "silver", card.BorderColor)
+	assert.Equal(t, "2015", card.Frame)
+	assert.Equal(t, []string(nil), card.FrameEffects)
+	assert.Equal(t, "", card.SecurityStamp)
+	assert.Equal(t, false, card.FullArt)
+	assert.Equal(t, false, card.Textless)
+	assert.Equal(t, true, card.Booster)
+	assert.Equal(t, false, card.StorySpotlight)
 
 	card = collection[3]
 	assert.True(t, card.Foil)
@@ -165,6 +264,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_191_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 
 	card = collection[4]
 	assert.True(t, card.Foil)
@@ -192,6 +292,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1s_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 
 	card = collection[5]
 	assert.True(t, card.Foil)
@@ -219,6 +320,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1p_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 
 	card = collection[6]
 	assert.True(t, card.Foil)
@@ -248,6 +350,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 
 	card = collection[7]
 	assert.True(t, card.Foil)
@@ -277,6 +380,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en_back.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 
 	card = collection[8]
 	assert.True(t, card.Foil)
@@ -304,6 +408,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	// TODO other fields
 }
 
 func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
