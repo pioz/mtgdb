@@ -29,39 +29,41 @@ type Card struct {
 	HasBackSide     bool   `gorm:"not null"`
 	ReleasedAt      *time.Time
 	ScryfallId      string `gorm:"size:255;not null"`
+	OracleId        string `gorm:"size:255"`
 	MtgoID          uint64
 	ArenaID         uint64
 	TcgplayerID     uint64
 	CardmarketID    uint64
-	Layout          string
-	ManaCost        string
+	Layout          string `gorm:"size:255"`
+	ManaCost        string `gorm:"size:255"`
 	CMC             float32
-	TypeLine        string
-	OracleText      string
-	Power           string
-	Toughness       string
-	Colors          []string  `gorm:"type:json"`
-	ColorIdentity   []string  `gorm:"type:json"`
-	Keywords        []string  `gorm:"type:json"`
-	ProducedMana    []string  `gorm:"type:json"`
-	Legalities      MapString `gorm:"type:json"`
-	Games           []string  `gorm:"type:json"`
+	TypeLine        string      `gorm:"size:255"`
+	OracleText      string      `gorm:"size:255"`
+	Power           string      `gorm:"size:255"`
+	Toughness       string      `gorm:"size:255"`
+	Colors          SliceString `gorm:"type:json"`
+	ColorIdentity   SliceString `gorm:"type:json"`
+	Keywords        SliceString `gorm:"type:json"`
+	ProducedMana    SliceString `gorm:"type:json"`
+	Legalities      MapString   `gorm:"type:json"`
+	Games           SliceString `gorm:"type:json"`
 	Oversized       bool
 	Promo           bool
 	Reprint         bool
 	Variation       bool
 	Digital         bool
-	Rarity          string
-	Watermark       string
-	Artist          string
-	BorderColor     string
-	Frame           string
-	FrameEffects    []string `gorm:"type:json"`
-	SecurityStamp   string
+	Rarity          string      `gorm:"size:255"`
+	Watermark       string      `gorm:"size:255"`
+	Artist          string      `gorm:"size:255"`
+	BorderColor     string      `gorm:"size:255"`
+	Frame           string      `gorm:"size:255"`
+	FrameEffects    SliceString `gorm:"type:json"`
+	SecurityStamp   string      `gorm:"size:255"`
 	FullArt         bool
 	Textless        bool
 	Booster         bool
 	StorySpotlight  bool
+	Rulings         Rulings `gorm:"type:json"`
 }
 
 func (card *Card) IsValid() bool {
@@ -97,9 +99,10 @@ func (card *Card) SetName(name, language string) {
 	}
 }
 
+// Custom sql datatypes
+
 type MapString map[string]interface{}
 
-// Scan scan value into Jsonb, implements sql.Scanner interface
 func (j *MapString) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
@@ -112,8 +115,70 @@ func (j *MapString) Scan(value interface{}) error {
 	return err
 }
 
-// Value return json value, implement driver.Valuer interface
 func (j MapString) Value() (driver.Value, error) {
+	if len(j) == 0 {
+		return nil, nil
+	}
+	return json.Marshal(j)
+}
+
+type SliceString []string
+
+func (j *SliceString) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("failed to unmarshal json value:", value))
+	}
+
+	result := SliceString{}
+	err := json.Unmarshal(bytes, &result)
+	*j = SliceString(result)
+	return err
+}
+
+func (j SliceString) Value() (driver.Value, error) {
+	if len(j) == 0 {
+		return nil, nil
+	}
+	return json.Marshal(j)
+}
+
+type Ruling struct {
+	PublishedAt time.Time `json:"published_at"`
+	Comment     string    `json:"comment"`
+}
+
+func (j *Ruling) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("failed to unmarshal json value:", value))
+	}
+
+	result := Ruling{}
+	err := json.Unmarshal(bytes, &result)
+	*j = Ruling(result)
+	return err
+}
+
+func (j Ruling) Value() (driver.Value, error) {
+	return json.Marshal(j)
+}
+
+type Rulings []Ruling
+
+func (j *Rulings) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("failed to unmarshal json value:", value))
+	}
+
+	result := Rulings{}
+	err := json.Unmarshal(bytes, &result)
+	*j = Rulings(result)
+	return err
+}
+
+func (j Rulings) Value() (driver.Value, error) {
 	if len(j) == 0 {
 		return nil, nil
 	}

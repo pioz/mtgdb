@@ -1,0 +1,37 @@
+[
+  {
+    "object": "ruling",
+    "oracle_id": "35df179a-c0e6-4ac1-a861-e6e9b4d1614d",
+    "source": "wotc",
+    "published_at": "2019-10-04",
+    "comment": "Acclaimed Contender’s ability won’t trigger if you don’t control another Knight immediately after it enters the battlefield. If you don’t control another Knight as that ability resolves, the ability has no effect. This doesn’t have the be the same Knight at both times, however."
+  },
+  {
+    "object": "ruling",
+    "oracle_id": "35df179a-c0e6-4ac1-a861-e6e9b4d1614d",
+    "source": "wotc",
+    "published_at": "2019-10-04",
+    "comment": "Acclaimed Contender’s ability can get you at most one card from the top five cards, no matter how many other Knights you control."
+  },
+  {
+    "object": "ruling",
+    "oracle_id": "e0cef79c-ad47-4cbc-9d73-a913e487ccb7",
+    "source": "wotc",
+    "published_at": "2019-10-04",
+    "comment": "If the target creature is an illegal target by the time Garruk’s second ability tries to resolve, the ability won’t resolve. You won’t draw a card. If the target is legal but not destroyed (most likely because it has indestructible), you will still draw."
+  },
+  {
+    "object": "ruling",
+    "oracle_id": "e0cef79c-ad47-4cbc-9d73-a913e487ccb7",
+    "source": "wotc",
+    "published_at": "2019-10-04",
+    "comment": "If lethal damage is dealt to one of Garruk’s Wolf tokens at the same time that Garruk’s loyalty is brought to 0 or less, Garruk is put into your graveyard before the Wolf’s triggered ability can save him."
+  },
+  {
+    "object": "ruling",
+    "oracle_id": "280624aa-5f9a-48fd-85ea-815c96c747b3",
+    "source": "wotc",
+    "published_at": "2016-07-13",
+    "comment": "For more information on double-faced cards, see the Shadows over Innistrad mechanics article (http://magic.wizards.com/en/articles/archive/feature/shadows-over-innistrad-mechanics)."
+  }
+]

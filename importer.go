@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -39,6 +38,7 @@ type Importer struct {
 
 	cardCollection        map[string]*Card
 	setCollection         map[string]*Set
+	rulingsCollection     map[string]Rulings
 	setIconsDownloaded    map[string]struct{}
 	notEnImagesToDownload map[string]*cardJsonStruct
 	downloadedImagesCount uint32
@@ -76,6 +76,7 @@ func (importer *Importer) DownloadData() error {
 
 	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
 	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
+	rulingsJsonFilePath := filepath.Join(importer.DataDir, "rulings.json")
 	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
 		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
@@ -83,11 +84,15 @@ func (importer *Importer) DownloadData() error {
 		}
 	}
 	if _, err := os.Stat(allCardsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
-		allCardsDataUrl, err := fetchAllCardsDataUrl()
+		urls, err := fetchAllCardsDataUrl()
 		if err != nil {
 			return err
 		}
-		err = downloadFile(allCardsJsonFilePath, allCardsDataUrl)
+		err = downloadFile(allCardsJsonFilePath, urls["all_cards"])
+		if err != nil {
+			return err
+		}
+		err = downloadFile(rulingsJsonFilePath, urls["rulings"])
 		if err != nil {
 			return err
 		}
@@ -101,6 +106,7 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	importer.downloadedImagesCount = 0
 	importer.cardCollection = make(map[string]*Card)
 	importer.setCollection = make(map[string]*Set)
+	importer.rulingsCollection = make(map[string]Rulings)
 	if importer.DownloadAssets {
 		createDirIfNotExist(SetImagesDir(importer.ImagesDir))
 		importer.setIconsDownloaded = make(map[string]struct{})
@@ -117,6 +123,23 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 			continue
 		}
 		importer.buildSet(&setJson)
+	}
+
+	rulingsJson := make([]rulingsJsonStruct, 0)
+	err = loadFile(filepath.Join(importer.DataDir, "rulings.json"), &rulingsJson)
+	if err != nil {
+		panic(err)
+	}
+	for _, rulingJson := range rulingsJson {
+		publishedAt, err := time.Parse("2006-01-02 15:04:05", rulingJson.PublishedAt+" 00:00:00")
+		if err != nil {
+			continue
+		}
+		ruling := Ruling{PublishedAt: publishedAt, Comment: rulingJson.Comment}
+		if _, found := importer.rulingsCollection[rulingJson.OracleId]; !found {
+			importer.rulingsCollection[rulingJson.OracleId] = make(Rulings, 0)
+		}
+		importer.rulingsCollection[rulingJson.OracleId] = append(importer.rulingsCollection[rulingJson.OracleId], ruling)
 	}
 
 	if importer.DownloadAssets && importer.DisplayProgressBar {
@@ -226,6 +249,12 @@ type setJsonStruct struct {
 	SetType       string `json:"set_type"`
 }
 
+type rulingsJsonStruct struct {
+	OracleId    string `json:"oracle_id"`
+	PublishedAt string `json:"published_at"`
+	Comment     string `json:"comment"`
+}
+
 func (setJson *setJsonStruct) getIconName() string {
 	basename := filepath.Base(setJson.IconSvgUri)
 	return strings.Split(basename, ".")[0]
@@ -242,6 +271,7 @@ func (setJson *setJsonStruct) getParentCode() (code string) {
 
 type cardJsonStruct struct {
 	Id              string                 `json:"id"`
+	OracleId        string                 `json:"oracle_id"`
 	Name            string                 `json:"name"`
 	PrintedName     string                 `json:"printed_name"`
 	Lang            string                 `json:"lang"`
@@ -318,31 +348,26 @@ type cardFaceStruct struct {
 
 // PRIVATE functions
 
-func fetchAllCardsDataUrl() (string, error) {
+func fetchAllCardsDataUrl() (map[string]string, error) {
 	resp, err := http.Get("https://api.scryfall.com/bulk-data")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var bulkDataArray bulkDataArrayJsonStruct
-	var cardsUrl string
 	err = json.Unmarshal(body, &bulkDataArray)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	urls := make(map[string]string)
 	for _, bulkData := range bulkDataArray.Data {
-		if bulkData.Type == "all_cards" {
-			cardsUrl = bulkData.DownloadUri
-		}
+		urls[bulkData.Type] = bulkData.DownloadUri
 	}
-	if cardsUrl == "" {
-		return "", errors.New("impossible to retrieve all cards data url")
-	}
-	return cardsUrl, nil
+	return urls, nil
 }
 
 func (importer *Importer) buildSet(setJson *setJsonStruct) {
@@ -377,7 +402,6 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	card, found := importer.cardCollection[key]
 	if !found {
 		card = &Card{
-			ScryfallId:      cardJson.Id,
 			EnName:          cardJson.Name,
 			SetCode:         cardJson.SetCode,
 			CollectorNumber: cardJson.CollectorNumber,
@@ -385,6 +409,8 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			Set:             importer.setCollection[cardJson.SetCode],
 			Foil:            cardJson.Foil,
 			NonFoil:         cardJson.NonFoil,
+			ScryfallId:      cardJson.Id,
+			OracleId:        cardJson.OracleId,
 			MtgoID:          cardJson.MtgoID,
 			ArenaID:         cardJson.ArenaID,
 			TcgplayerID:     cardJson.TcgplayerID,
@@ -418,6 +444,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			Textless:        cardJson.Textless,
 			Booster:         cardJson.Booster,
 			StorySpotlight:  cardJson.StorySpotlight,
+			Rulings:         importer.rulingsCollection[cardJson.OracleId],
 		}
 		importer.cardCollection[key] = card
 		if importer.DownloadAssets {
