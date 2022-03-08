@@ -113,8 +113,19 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 		importer.notEnImagesToDownload = make(map[string]*cardJsonStruct)
 	}
 
+	// Fill importer.rulingsCollection
+	rulingsJson := make([]rulingsJsonStruct, 0)
+	err := loadFile(filepath.Join(importer.DataDir, "rulings.json"), &rulingsJson)
+	if err != nil {
+		panic(err)
+	}
+	for _, rulingJson := range rulingsJson {
+		importer.buildRuling(&rulingJson)
+	}
+
+	// Fill importer.setCollection
 	setsJson := setsJsonStruct{}
-	err := loadFile(filepath.Join(importer.DataDir, "all_sets.json"), &setsJson)
+	err = loadFile(filepath.Join(importer.DataDir, "all_sets.json"), &setsJson)
 	if err != nil {
 		panic(err)
 	}
@@ -125,27 +136,11 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 		importer.buildSet(&setJson)
 	}
 
-	rulingsJson := make([]rulingsJsonStruct, 0)
-	err = loadFile(filepath.Join(importer.DataDir, "rulings.json"), &rulingsJson)
-	if err != nil {
-		panic(err)
-	}
-	for _, rulingJson := range rulingsJson {
-		publishedAt, err := time.Parse("2006-01-02 15:04:05", rulingJson.PublishedAt+" 00:00:00")
-		if err != nil {
-			continue
-		}
-		ruling := Ruling{PublishedAt: publishedAt, Comment: rulingJson.Comment}
-		if _, found := importer.rulingsCollection[rulingJson.OracleId]; !found {
-			importer.rulingsCollection[rulingJson.OracleId] = make(Rulings, 0)
-		}
-		importer.rulingsCollection[rulingJson.OracleId] = append(importer.rulingsCollection[rulingJson.OracleId], ruling)
-	}
-
 	if importer.DownloadAssets && importer.DisplayProgressBar {
 		importer.bar = pb.New("Download images", 0)
 	}
 
+	// Fill importer.cardCollection
 	streamer, err := NewJsonStreamer(filepath.Join(importer.DataDir, "all_cards.json"))
 	if err != nil {
 		panic(err)
@@ -368,6 +363,18 @@ func fetchAllCardsDataUrl() (map[string]string, error) {
 		urls[bulkData.Type] = bulkData.DownloadUri
 	}
 	return urls, nil
+}
+
+func (importer *Importer) buildRuling(rulingJson *rulingsJsonStruct) {
+	publishedAt, err := time.Parse("2006-01-02 15:04:05", rulingJson.PublishedAt+" 00:00:00")
+	if err != nil {
+		return
+	}
+	ruling := Ruling{PublishedAt: publishedAt, Comment: rulingJson.Comment}
+	if _, found := importer.rulingsCollection[rulingJson.OracleId]; !found {
+		importer.rulingsCollection[rulingJson.OracleId] = make(Rulings, 0)
+	}
+	importer.rulingsCollection[rulingJson.OracleId] = append(importer.rulingsCollection[rulingJson.OracleId], ruling)
 }
 
 func (importer *Importer) buildSet(setJson *setJsonStruct) {
