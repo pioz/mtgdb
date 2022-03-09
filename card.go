@@ -37,8 +37,8 @@ type Card struct {
 	Layout          string `gorm:"size:255"`
 	ManaCost        string `gorm:"size:255"`
 	CMC             float32
-	TypeLine        string      `gorm:"size:255"`
-	OracleText      string      `gorm:"size:255"`
+	TypeLine        string `gorm:"size:255"`
+	OracleText      string
 	Power           string      `gorm:"size:255"`
 	Toughness       string      `gorm:"size:255"`
 	Colors          SliceString `gorm:"type:json"`
