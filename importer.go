@@ -265,53 +265,56 @@ func (setJson *setJsonStruct) getParentCode() (code string) {
 }
 
 type cardJsonStruct struct {
-	Id              string                 `json:"id"`
-	OracleId        string                 `json:"oracle_id"`
-	Name            string                 `json:"name"`
-	PrintedName     string                 `json:"printed_name"`
-	Lang            string                 `json:"lang"`
-	ImageUris       imagesCardJsonStruct   `json:"image_uris"`
-	CardFaces       []cardFaceStruct       `json:"card_faces"`
-	SetCode         string                 `json:"set"`
-	SetName         string                 `json:"set_name"`
-	SetType         string                 `json:"set_type"`
-	CollectorNumber string                 `json:"collector_number"`
-	Foil            bool                   `json:"foil"`
-	NonFoil         bool                   `json:"nonfoil"`
-	ReleasedAt      string                 `json:"released_at"`
-	MtgoID          uint64                 `json:"mtgo_id"`
-	ArenaID         uint64                 `json:"arena_id"`
-	TcgplayerID     uint64                 `json:"tcgplayer_id"`
-	CardmarketID    uint64                 `json:"cardmarket_id"`
-	Layout          string                 `json:"layout"`
-	ManaCost        string                 `json:"mana_cost"`
-	CMC             float32                `json:"cmc"`
-	TypeLine        string                 `json:"type_line"`
-	OracleText      string                 `json:"oracle_text"`
-	Power           string                 `json:"power"`
-	Toughness       string                 `json:"toughness"`
-	Colors          []string               `json:"colors"`
-	ColorIdentity   []string               `json:"color_identity"`
-	Keywords        []string               `json:"keywords"`
-	ProducedMana    []string               `json:"produced_mana"`
-	Legalities      map[string]interface{} `json:"legalities"`
-	Games           []string               `json:"games"`
-	Oversized       bool                   `json:"oversized"`
-	Promo           bool                   `json:"promo"`
-	Reprint         bool                   `json:"reprint"`
-	Variation       bool                   `json:"variation"`
-	Digital         bool                   `json:"digital"`
-	Rarity          string                 `json:"rarity"`
-	Watermark       string                 `json:"watermark"`
-	Artist          string                 `json:"artist"`
-	BorderColor     string                 `json:"border_color"`
-	Frame           string                 `json:"frame"`
-	FrameEffects    []string               `json:"frame_effects"`
-	SecurityStamp   string                 `json:"security_stamp"`
-	FullArt         bool                   `json:"full_art"`
-	Textless        bool                   `json:"textless"`
-	Booster         bool                   `json:"booster"`
-	StorySpotlight  bool                   `json:"story_spotlight"`
+	Name        string               `json:"name"`
+	PrintedName string               `json:"printed_name"`
+	Lang        string               `json:"lang"`
+	ImageUris   imagesCardJsonStruct `json:"image_uris"`
+	CardFaces   []cardFaceStruct     `json:"card_faces"`
+	SetType     string               `json:"set_type"`
+
+	SetCode string `json:"set"`
+
+	CollectorNumber string `json:"collector_number"`
+	Foil            bool   `json:"foil"`
+	NonFoil         bool   `json:"nonfoil"`
+	ReleasedAt      string `json:"released_at"`
+
+	Layout         string                 `json:"layout"`
+	ManaCost       string                 `json:"mana_cost"`
+	CMC            float32                `json:"cmc"`
+	TypeLine       string                 `json:"type_line"`
+	OracleText     string                 `json:"oracle_text"`
+	Power          string                 `json:"power"`
+	Toughness      string                 `json:"toughness"`
+	Colors         []string               `json:"colors"`
+	ColorIdentity  []string               `json:"color_identity"`
+	Keywords       []string               `json:"keywords"`
+	ProducedMana   []string               `json:"produced_mana"`
+	Legalities     map[string]interface{} `json:"legalities"`
+	Games          []string               `json:"games"`
+	Oversized      bool                   `json:"oversized"`
+	Promo          bool                   `json:"promo"`
+	Reprint        bool                   `json:"reprint"`
+	Variation      bool                   `json:"variation"`
+	Digital        bool                   `json:"digital"`
+	Rarity         string                 `json:"rarity"`
+	Watermark      string                 `json:"watermark"`
+	Artist         string                 `json:"artist"`
+	BorderColor    string                 `json:"border_color"`
+	Frame          string                 `json:"frame"`
+	FrameEffects   []string               `json:"frame_effects"`
+	SecurityStamp  string                 `json:"security_stamp"`
+	FullArt        bool                   `json:"full_art"`
+	Textless       bool                   `json:"textless"`
+	Booster        bool                   `json:"booster"`
+	StorySpotlight bool                   `json:"story_spotlight"`
+
+	ScryfallID   string `json:"id"`
+	OracleID     string `json:"oracle_id"`
+	MtgoID       uint64 `json:"mtgo_id"`
+	ArenaID      uint64 `json:"arena_id"`
+	TcgplayerID  uint64 `json:"tcgplayer_id"`
+	CardmarketID uint64 `json:"cardmarket_id"`
 }
 
 type imagesCardJsonStruct struct {
@@ -407,57 +410,61 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	if !found {
 		releasedAt := parseTime("2006-01-02", cardJson.ReleasedAt)
 		card = &Card{
-			EnName:          cardJson.Name,
+			EnName: cardJson.Name,
+
 			SetCode:         cardJson.SetCode,
-			CollectorNumber: cardJson.CollectorNumber,
-			HasBackSide:     hasBackSide(cardJson),
 			Set:             importer.setCollection[cardJson.SetCode],
+			CollectorNumber: cardJson.CollectorNumber,
 			Foil:            cardJson.Foil,
 			NonFoil:         cardJson.NonFoil,
+			HasBackSide:     hasBackSide(cardJson),
 			ReleasedAt:      releasedAt,
-			ScryfallId:      cardJson.Id,
-			OracleId:        cardJson.OracleId,
-			MtgoID:          cardJson.MtgoID,
-			ArenaID:         cardJson.ArenaID,
-			TcgplayerID:     cardJson.TcgplayerID,
-			CardmarketID:    cardJson.CardmarketID,
-			Layout:          cardJson.Layout,
-			ManaCost:        cardJson.ManaCost,
-			CMC:             cardJson.CMC,
-			TypeLine:        cardJson.TypeLine,
-			OracleText:      cardJson.OracleText,
-			Power:           cardJson.Power,
-			Toughness:       cardJson.Toughness,
-			Colors:          cardJson.Colors,
-			ColorIdentity:   cardJson.ColorIdentity,
-			Keywords:        cardJson.Keywords,
-			ProducedMana:    cardJson.ProducedMana,
-			Legalities:      cardJson.Legalities,
-			Games:           cardJson.Games,
-			Oversized:       cardJson.Oversized,
-			Promo:           cardJson.Promo,
-			Reprint:         cardJson.Reprint,
-			Variation:       cardJson.Variation,
-			Digital:         cardJson.Digital,
-			Rarity:          cardJson.Rarity,
-			Watermark:       cardJson.Watermark,
-			Artist:          cardJson.Artist,
-			BorderColor:     cardJson.BorderColor,
-			Frame:           cardJson.Frame,
-			FrameEffects:    cardJson.FrameEffects,
-			SecurityStamp:   cardJson.SecurityStamp,
-			FullArt:         cardJson.FullArt,
-			Textless:        cardJson.Textless,
-			Booster:         cardJson.Booster,
-			StorySpotlight:  cardJson.StorySpotlight,
-			Rulings:         importer.rulingsCollection[cardJson.OracleId],
+
+			Layout:         cardJson.Layout,
+			ManaCost:       cardJson.ManaCost,
+			CMC:            cardJson.CMC,
+			TypeLine:       cardJson.TypeLine,
+			OracleText:     cardJson.OracleText,
+			Power:          cardJson.Power,
+			Toughness:      cardJson.Toughness,
+			Colors:         cardJson.Colors,
+			ColorIdentity:  cardJson.ColorIdentity,
+			Keywords:       cardJson.Keywords,
+			ProducedMana:   cardJson.ProducedMana,
+			Legalities:     cardJson.Legalities,
+			Games:          cardJson.Games,
+			Oversized:      cardJson.Oversized,
+			Promo:          cardJson.Promo,
+			Reprint:        cardJson.Reprint,
+			Variation:      cardJson.Variation,
+			Digital:        cardJson.Digital,
+			Rarity:         cardJson.Rarity,
+			Watermark:      cardJson.Watermark,
+			Artist:         cardJson.Artist,
+			BorderColor:    cardJson.BorderColor,
+			Frame:          cardJson.Frame,
+			FrameEffects:   cardJson.FrameEffects,
+			SecurityStamp:  cardJson.SecurityStamp,
+			FullArt:        cardJson.FullArt,
+			Textless:       cardJson.Textless,
+			Booster:        cardJson.Booster,
+			StorySpotlight: cardJson.StorySpotlight,
+
+			ScryfallID:   cardJson.ScryfallID,
+			OracleID:     cardJson.OracleID,
+			MtgoID:       cardJson.MtgoID,
+			ArenaID:      cardJson.ArenaID,
+			TcgplayerID:  cardJson.TcgplayerID,
+			CardmarketID: cardJson.CardmarketID,
+
+			Rulings: importer.rulingsCollection[cardJson.OracleID],
 		}
 		importer.cardCollection[key] = card
 		if importer.DownloadAssets {
 			importer.notEnImagesToDownload[key] = cardJson
 		}
 	} else if cardJson.Lang == "en" {
-		card.ScryfallId = cardJson.Id
+		card.ScryfallID = cardJson.ScryfallID
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
 		if importer.bar != nil {

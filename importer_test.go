@@ -39,7 +39,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
-		return collection[i].ScryfallId > collection[j].ScryfallId
+		return collection[i].ScryfallID > collection[j].ScryfallID
 	})
 
 	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/sets/eld.jpg"))
@@ -54,10 +54,10 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, 9, len(collection))
 	assert.Equal(t, uint32(42), downloadedImagesCount)
 
+	// Acclaimed Contender
+	///////////////////////
 	card := collection[0]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "Contendiente aclamada", card.EsName)
 	assert.Equal(t, "Concurrente acclamée", card.FrName)
@@ -69,6 +69,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "Превозносимая Претендентка", card.RuName)
 	assert.Equal(t, "受誉竞争者", card.ZhsName)
 	assert.Equal(t, "受譽競爭者", card.ZhtName)
+	// Set
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -76,20 +77,13 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "expansion", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "1", card.CollectorNumber)
-	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallId)
-	for _, lang := range []string{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"} {
-		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
-		assert.False(t, os.IsNotExist(err))
-		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
-		assert.True(t, os.IsNotExist(err))
-	}
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
-	assert.Equal(t, "35df179a-c0e6-4ac1-a861-e6e9b4d1614d", card.OracleId)
-	assert.Equal(t, uint64(0), card.MtgoID)
-	assert.Equal(t, uint64(0), card.ArenaID)
-	assert.Equal(t, uint64(0), card.TcgplayerID)
-	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Extra attributes
 	assert.Equal(t, "normal", card.Layout)
 	assert.Equal(t, "{2}{W}", card.ManaCost)
 	assert.Equal(t, float32(3), card.CMC)
@@ -119,16 +113,31 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, false, card.Textless)
 	assert.Equal(t, true, card.Booster)
 	assert.Equal(t, false, card.StorySpotlight)
+	// IDs
+	assert.Equal(t, "fb6b12e7-bb93-4eb6-bad1-b256a6ccff4e", card.ScryfallID)
+	assert.Equal(t, "35df179a-c0e6-4ac1-a861-e6e9b4d1614d", card.OracleID)
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(0), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Rulings
 	assert.Equal(t, 2, len(card.Rulings))
 	assert.Equal(t, "Acclaimed Contender’s ability won’t trigger if you don’t control another Knight immediately after it enters the battlefield. If you don’t control another Knight as that ability resolves, the ability has no effect. This doesn’t have the be the same Knight at both times, however.", card.Rulings[0].Comment)
 	assert.Equal(t, "2019-10-04 00:00:00", card.Rulings[0].PublishedAt.Format("2006-01-02 15:04:05"))
 	assert.Equal(t, "Acclaimed Contender’s ability can get you at most one card from the top five cards, no matter how many other Knights you control.", card.Rulings[1].Comment)
 	assert.Equal(t, "2019-10-04 00:00:00", card.Rulings[1].PublishedAt.Format("2006-01-02 15:04:05"))
+	// Files
+	for _, lang := range []string{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"} {
+		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
+		assert.False(t, os.IsNotExist(err))
+		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
+		assert.True(t, os.IsNotExist(err))
+	}
 
+	// Garruk, Cursed Huntsman Emblem
+	//////////////////////////////////
 	card = collection[1]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Garruk, Cursed Huntsman Emblem", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -140,6 +149,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "teld", card.SetCode)
 	assert.Equal(t, "teld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -147,16 +157,13 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "token", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "19", card.CollectorNumber)
-	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19_en.jpg"))
-	assert.False(t, os.IsNotExist(err))
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
-	assert.Equal(t, "6a5090b1-5eb6-4709-8208-ff3678be5756", card.OracleId)
-	assert.Equal(t, uint64(0), card.MtgoID)
-	assert.Equal(t, uint64(0), card.ArenaID)
-	assert.Equal(t, uint64(0), card.TcgplayerID)
-	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Extra attributes
 	assert.Equal(t, "emblem", card.Layout)
 	assert.Equal(t, "", card.ManaCost)
 	assert.Equal(t, float32(0), card.CMC)
@@ -186,12 +193,23 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, false, card.Textless)
 	assert.Equal(t, false, card.Booster)
 	assert.Equal(t, false, card.StorySpotlight)
+	// IDs
+	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallID)
+	assert.Equal(t, "6a5090b1-5eb6-4709-8208-ff3678be5756", card.OracleID)
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(0), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Rulings
 	assert.Equal(t, 0, len(card.Rulings))
+	// Files
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19_en.jpg"))
+	assert.False(t, os.IsNotExist(err))
 
+	// Rumors of My Death
+	//////////////////////
 	card = collection[2]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "\"Rumors of My Death . . .\"", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -203,6 +221,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "ust", card.SetCode)
 	assert.Equal(t, "ust", card.Set.Code)
 	assert.Equal(t, "ust", card.Set.ParentCode)
@@ -210,16 +229,13 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "funny", card.Set.Typology)
 	assert.Equal(t, "ust", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "65", card.CollectorNumber)
-	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65_en.jpg"))
-	assert.False(t, os.IsNotExist(err))
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.ReleasedAt.String())
-	assert.Equal(t, "38bcba8b-2838-4ac8-9976-f9ccaa94fdba", card.OracleId)
-	assert.Equal(t, uint64(0), card.MtgoID)
-	assert.Equal(t, uint64(0), card.ArenaID)
-	assert.Equal(t, uint64(153145), card.TcgplayerID)
-	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Extra attributes
 	assert.Equal(t, "normal", card.Layout)
 	assert.Equal(t, "{2}{B}", card.ManaCost)
 	assert.Equal(t, float32(3), card.CMC)
@@ -249,12 +265,23 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, false, card.Textless)
 	assert.Equal(t, true, card.Booster)
 	assert.Equal(t, false, card.StorySpotlight)
+	// IDs
+	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallID)
+	assert.Equal(t, "38bcba8b-2838-4ac8-9976-f9ccaa94fdba", card.OracleID)
+	assert.Equal(t, uint64(0), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(153145), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Rulings
 	assert.Equal(t, 0, len(card.Rulings))
+	// Files
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65_en.jpg"))
+	assert.False(t, os.IsNotExist(err))
 
+	// Garruk, Cursed Huntsman
+	///////////////////////////
 	card = collection[3]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Garruk, Cursed Huntsman", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -266,6 +293,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -273,16 +301,63 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "expansion", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "191", card.CollectorNumber)
-	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	// Extra attributes
+	assert.Equal(t, "normal", card.Layout)
+	assert.Equal(t, "{4}{B}{G}", card.ManaCost)
+	assert.Equal(t, float32(6), card.CMC)
+	assert.Equal(t, "Legendary Planeswalker — Garruk", card.TypeLine)
+	assert.Equal(t, "0: Create two 2/2 black and green Wolf creature tokens with \"When this creature dies, put a loyalty counter on each Garruk you control.\"\n−3: Destroy target creature. Draw a card.\n−6: You get an emblem with \"Creatures you control get +3/+3 and have trample.\"", card.OracleText)
+	assert.Equal(t, "", card.Power)
+	assert.Equal(t, "", card.Toughness)
+	assert.Equal(t, mtgdb.SliceString{"B", "G"}, card.Colors)
+	assert.Equal(t, mtgdb.SliceString{"B", "G"}, card.ColorIdentity)
+	assert.Equal(t, mtgdb.SliceString(nil), card.Keywords)
+	assert.Equal(t, mtgdb.SliceString(nil), card.ProducedMana)
+	assert.Equal(t, mtgdb.MapString{"brawl": "legal", "commander": "legal", "duel": "legal", "future": "legal", "historic": "legal", "legacy": "legal", "modern": "legal", "oldschool": "not_legal", "pauper": "not_legal", "penny": "not_legal", "pioneer": "legal", "standard": "legal", "vintage": "legal"}, card.Legalities)
+	assert.Equal(t, mtgdb.SliceString{"arena", "mtgo", "paper"}, card.Games)
+	assert.Equal(t, false, card.Oversized)
+	assert.Equal(t, false, card.Promo)
+	assert.Equal(t, false, card.Reprint)
+	assert.Equal(t, false, card.Variation)
+	assert.Equal(t, false, card.Digital)
+	assert.Equal(t, "mythic", card.Rarity)
+	assert.Equal(t, "", card.Watermark)
+	assert.Equal(t, "Eric Deschamps", card.Artist)
+	assert.Equal(t, "black", card.BorderColor)
+	assert.Equal(t, "2015", card.Frame)
+	assert.Equal(t, mtgdb.SliceString(nil), card.FrameEffects)
+	assert.Equal(t, "", card.SecurityStamp)
+	assert.Equal(t, false, card.FullArt)
+	assert.Equal(t, false, card.Textless)
+	assert.Equal(t, true, card.Booster)
+	assert.Equal(t, false, card.StorySpotlight)
+	// IDs
+	assert.Equal(t, "abef512f-8f1d-4257-b16f-c0eed58670ec", card.ScryfallID)
+	assert.Equal(t, "e0cef79c-ad47-4cbc-9d73-a913e487ccb7", card.OracleID)
+	assert.Equal(t, uint64(78526), card.MtgoID)
+	assert.Equal(t, uint64(70338), card.ArenaID)
+	assert.Equal(t, uint64(198500), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Rulings
+	assert.Equal(t, 2, len(card.Rulings))
+	assert.Equal(t, "If the target creature is an illegal target by the time Garruk’s second ability tries to resolve, the ability won’t resolve. You won’t draw a card. If the target is legal but not destroyed (most likely because it has indestructible), you will still draw.", card.Rulings[0].Comment)
+	assert.Equal(t, "2019-10-04 00:00:00", card.Rulings[0].PublishedAt.Format("2006-01-02 15:04:05"))
+	assert.Equal(t, "If lethal damage is dealt to one of Garruk’s Wolf tokens at the same time that Garruk’s loyalty is brought to 0 or less, Garruk is put into your graveyard before the Wolf’s triggered ability can save him.", card.Rulings[1].Comment)
+	assert.Equal(t, "2019-10-04 00:00:00", card.Rulings[1].PublishedAt.Format("2006-01-02 15:04:05"))
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_191_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
-	// TODO other fields
 
+	// Acclaimed Contender
+	///////////////////////
 	card = collection[4]
-	assert.True(t, card.Foil)
-	assert.False(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -294,6 +369,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "peld", card.SetCode)
 	assert.Equal(t, "peld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -301,16 +377,22 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "promo", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "1s", card.CollectorNumber)
-	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.False(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
+	// IDs
+	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallID)
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1s_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	// TODO other fields
 
+	// Acclaimed Contender
+	///////////////////////
 	card = collection[5]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -322,6 +404,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "peld", card.SetCode)
 	assert.Equal(t, "peld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -329,16 +412,22 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "promo", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "1p", card.CollectorNumber)
-	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
+	// IDs
+	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallID)
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/peld/peld_1p_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	// TODO other fields
 
+	// Nissa, Who Shakes the World
+	///////////////////////////////
 	card = collection[6]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -350,6 +439,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "war", card.SetCode)
 	assert.Equal(t, "war", card.Set.Code)
 	assert.Equal(t, "war", card.Set.ParentCode)
@@ -357,18 +447,24 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-05-03 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "expansion", card.Set.Typology)
 	assert.Equal(t, "war", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "169★", card.CollectorNumber)
-	assert.Equal(t, "25d63632-c019-4f34-926a-42f829a4665c", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
+	// IDs
+	assert.Equal(t, "25d63632-c019-4f34-926a-42f829a4665c", card.ScryfallID)
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_ja.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	// TODO other fields
 
+	// Daybreak Ranger // Nightfall Predator
+	/////////////////////////////////////////
 	card = collection[7]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.True(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", card.EnName)
 	assert.Equal(t, "Guardabosque del amanecer // Depredadora del anochecer", card.EsName)
 	assert.Equal(t, "Ranger de l'aube // Prédateur du crépuscule", card.FrName)
@@ -380,6 +476,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "Рассветная Обходчица // Сумеречная Хищница", card.RuName)
 	assert.Equal(t, "破晓护林人 // 夜幕掠食者", card.ZhsName)
 	assert.Equal(t, "破曉護林人 // 夜幕掠食者", card.ZhtName)
+	// Set
 	assert.Equal(t, "isd", card.SetCode)
 	assert.Equal(t, "isd", card.Set.Code)
 	assert.Equal(t, "isd", card.Set.ParentCode)
@@ -387,18 +484,63 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "expansion", card.Set.Typology)
 	assert.Equal(t, "isd", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "176", card.CollectorNumber)
-	assert.Equal(t, "25b54a1d-e201-453b-9173-b04e06ee6fb7", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.True(t, card.HasBackSide)
+	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	// Extra attributes
+	assert.Equal(t, "transform", card.Layout)
+	assert.Equal(t, "", card.ManaCost)
+	assert.Equal(t, float32(3), card.CMC)
+	assert.Equal(t, "Creature — Human Archer Werewolf // Creature — Werewolf", card.TypeLine)
+	assert.Equal(t, "", card.OracleText)
+	assert.Equal(t, "", card.Power)
+	assert.Equal(t, "", card.Toughness)
+	assert.Equal(t, mtgdb.SliceString(nil), card.Colors)
+	assert.Equal(t, mtgdb.SliceString{"G", "R"}, card.ColorIdentity)
+	assert.Equal(t, mtgdb.SliceString(nil), card.Keywords)
+	assert.Equal(t, mtgdb.SliceString(nil), card.ProducedMana)
+	assert.Equal(t, mtgdb.MapString{"brawl": "not_legal", "commander": "legal", "duel": "legal", "future": "not_legal", "historic": "not_legal", "legacy": "legal", "modern": "legal", "oldschool": "not_legal", "pauper": "not_legal", "penny": "legal", "pioneer": "not_legal", "standard": "not_legal", "vintage": "legal"}, card.Legalities)
+	assert.Equal(t, mtgdb.SliceString{"mtgo", "paper"}, card.Games)
+	assert.Equal(t, false, card.Oversized)
+	assert.Equal(t, false, card.Promo)
+	assert.Equal(t, false, card.Reprint)
+	assert.Equal(t, false, card.Variation)
+	assert.Equal(t, false, card.Digital)
+	assert.Equal(t, "rare", card.Rarity)
+	assert.Equal(t, "", card.Watermark)
+	assert.Equal(t, "Steve Prescott", card.Artist)
+	assert.Equal(t, "black", card.BorderColor)
+	assert.Equal(t, "2003", card.Frame)
+	assert.Equal(t, mtgdb.SliceString{"sunmoondfc"}, card.FrameEffects)
+	assert.Equal(t, "", card.SecurityStamp)
+	assert.Equal(t, false, card.FullArt)
+	assert.Equal(t, false, card.Textless)
+	assert.Equal(t, true, card.Booster)
+	assert.Equal(t, false, card.StorySpotlight)
+	// IDs
+	assert.Equal(t, "25b54a1d-e201-453b-9173-b04e06ee6fb7", card.ScryfallID)
+	assert.Equal(t, "280624aa-5f9a-48fd-85ea-815c96c747b3", card.OracleID)
+	assert.Equal(t, uint64(42390), card.MtgoID)
+	assert.Equal(t, uint64(0), card.ArenaID)
+	assert.Equal(t, uint64(52166), card.TcgplayerID)
+	assert.Equal(t, uint64(0), card.CardmarketID)
+	// Rulings
+	assert.Equal(t, 1, len(card.Rulings))
+	assert.Equal(t, "For more information on double-faced cards, see the Shadows over Innistrad mechanics article (http://magic.wizards.com/en/articles/archive/feature/shadows-over-innistrad-mechanics).", card.Rulings[0].Comment)
+	assert.Equal(t, "2016-07-13 00:00:00", card.Rulings[0].PublishedAt.Format("2006-01-02 15:04:05"))
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/isd/isd_176_en_back.jpg"))
 	assert.False(t, os.IsNotExist(err))
-	// TODO other fields
 
+	// Acclaimed Contender
+	///////////////////////
 	card = collection[8]
-	assert.True(t, card.Foil)
-	assert.True(t, card.NonFoil)
-	assert.False(t, card.HasBackSide)
+	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
 	assert.Equal(t, "", card.FrName)
@@ -410,6 +552,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "", card.RuName)
 	assert.Equal(t, "", card.ZhsName)
 	assert.Equal(t, "", card.ZhtName)
+	// Set
 	assert.Equal(t, "eld", card.SetCode)
 	assert.Equal(t, "eld", card.Set.Code)
 	assert.Equal(t, "eld", card.Set.ParentCode)
@@ -417,8 +560,14 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
 	assert.Equal(t, "expansion", card.Set.Typology)
 	assert.Equal(t, "eld", card.Set.IconName)
+	// Core attributes
 	assert.Equal(t, "334", card.CollectorNumber)
-	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallId)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.False(t, card.HasBackSide)
+	// IDs
+	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallID)
+	// Files
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
 	// TODO other fields
@@ -433,7 +582,7 @@ func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
 
 	collection, downloadedImagesCount := importer.BuildCardsFromJson()
 	sort.Slice(collection, func(i, j int) bool {
-		return collection[i].ScryfallId > collection[j].ScryfallId
+		return collection[i].ScryfallID > collection[j].ScryfallID
 	})
 
 	assert.Equal(t, uint32(11), downloadedImagesCount)

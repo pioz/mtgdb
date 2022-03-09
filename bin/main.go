@@ -129,7 +129,7 @@ func main() {
 	// Remove deleted cards
 	collectionScryfallIds := make(map[string]struct{})
 	for _, card := range collection {
-		collectionScryfallIds[card.ScryfallId] = struct{}{}
+		collectionScryfallIds[card.ScryfallID] = struct{}{}
 	}
 	scryfallIdsNotFound := make([]string, 0)
 	for _, scryfallId := range scryfallIds {
