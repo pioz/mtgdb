@@ -2,43 +2,41 @@ name: Go
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-      id: go
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
-        sudo apt-get install librsvg2-bin
-      
-    - name: Start MySQL
-      run: sudo /etc/init.d/mysql start
-      
-    - name: Create empty database
-      run: echo "create database mtgdb_test" | mysql -uroot -proot
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+          sudo apt-get install librsvg2-bin
 
-    - name: Run mtgdb test
-      run: DB_CONNECTION="root:root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
-      
-    - name: Build mtgdb
-      run: go build -o mtgdb ./bin/main.go
+      - name: Start MySQL
+        run: sudo /etc/init.d/mysql start
+
+      - name: Create empty database
+        run: echo "create database mtgdb_test" | mysql -uroot -proot
+
+      - name: Run mtgdb test
+        run: DB_CONNECTION="root:root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
+
+      - name: Build mtgdb
+        run: go build -o mtgdb ./mtgdb-cli/main.go
