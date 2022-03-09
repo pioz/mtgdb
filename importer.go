@@ -270,7 +270,6 @@ type cardJsonStruct struct {
 	Name            string                 `json:"name"`
 	PrintedName     string                 `json:"printed_name"`
 	Lang            string                 `json:"lang"`
-	ReleasedAt      string                 `json:"released_at"`
 	ImageUris       imagesCardJsonStruct   `json:"image_uris"`
 	CardFaces       []cardFaceStruct       `json:"card_faces"`
 	SetCode         string                 `json:"set"`
@@ -279,6 +278,7 @@ type cardJsonStruct struct {
 	CollectorNumber string                 `json:"collector_number"`
 	Foil            bool                   `json:"foil"`
 	NonFoil         bool                   `json:"nonfoil"`
+	ReleasedAt      string                 `json:"released_at"`
 	MtgoID          uint64                 `json:"mtgo_id"`
 	ArenaID         uint64                 `json:"arena_id"`
 	TcgplayerID     uint64                 `json:"tcgplayer_id"`
@@ -366,10 +366,7 @@ func fetchAllCardsDataUrl() (map[string]string, error) {
 }
 
 func (importer *Importer) buildRuling(rulingJson *rulingsJsonStruct) {
-	publishedAt, err := time.Parse("2006-01-02 15:04:05", rulingJson.PublishedAt+" 00:00:00")
-	if err != nil {
-		return
-	}
+	publishedAt := parseTime("2006-01-02", rulingJson.PublishedAt)
 	ruling := Ruling{PublishedAt: publishedAt, Comment: rulingJson.Comment}
 	if _, found := importer.rulingsCollection[rulingJson.OracleId]; !found {
 		importer.rulingsCollection[rulingJson.OracleId] = make(Rulings, 0)
@@ -408,6 +405,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	key := fmt.Sprintf("%s-%s", cardJson.SetCode, cardJson.CollectorNumber)
 	card, found := importer.cardCollection[key]
 	if !found {
+		releasedAt := parseTime("2006-01-02", cardJson.ReleasedAt)
 		card = &Card{
 			EnName:          cardJson.Name,
 			SetCode:         cardJson.SetCode,
@@ -416,6 +414,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			Set:             importer.setCollection[cardJson.SetCode],
 			Foil:            cardJson.Foil,
 			NonFoil:         cardJson.NonFoil,
+			ReleasedAt:      releasedAt,
 			ScryfallId:      cardJson.Id,
 			OracleId:        cardJson.OracleId,
 			MtgoID:          cardJson.MtgoID,
@@ -737,6 +736,14 @@ func createDirIfNotExist(path string) {
 			panic(err)
 		}
 	}
+}
+
+func parseTime(format, timeString string) *time.Time {
+	t, err := time.Parse(format, timeString)
+	if err != nil {
+		return nil
+	}
+	return &t
 }
 
 func retryOnError(attempts int, delay time.Duration, f func() error) error {

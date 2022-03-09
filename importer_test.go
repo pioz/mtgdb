@@ -84,6 +84,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
 		assert.True(t, os.IsNotExist(err))
 	}
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "35df179a-c0e6-4ac1-a861-e6e9b4d1614d", card.OracleId)
 	assert.Equal(t, uint64(0), card.MtgoID)
 	assert.Equal(t, uint64(0), card.ArenaID)
@@ -150,6 +151,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "d6c65749-1774-4b36-891e-abf762c95cec", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/teld/teld_19_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "6a5090b1-5eb6-4709-8208-ff3678be5756", card.OracleId)
 	assert.Equal(t, uint64(0), card.MtgoID)
 	assert.Equal(t, uint64(0), card.ArenaID)
@@ -212,6 +214,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "cb3587b9-e727-4f37-b4d6-1baa7316262f", card.ScryfallId)
 	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/ust/ust_65_en.jpg"))
 	assert.False(t, os.IsNotExist(err))
+	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.ReleasedAt.String())
 	assert.Equal(t, "38bcba8b-2838-4ac8-9976-f9ccaa94fdba", card.OracleId)
 	assert.Equal(t, uint64(0), card.MtgoID)
 	assert.Equal(t, uint64(0), card.ArenaID)

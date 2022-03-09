@@ -144,8 +144,8 @@ func (j SliceString) Value() (driver.Value, error) {
 }
 
 type Ruling struct {
-	PublishedAt time.Time `json:"published_at"`
-	Comment     string    `json:"comment"`
+	PublishedAt *time.Time `json:"published_at"`
+	Comment     string     `json:"comment"`
 }
 
 func (j *Ruling) Scan(value interface{}) error {
