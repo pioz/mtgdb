@@ -49,7 +49,7 @@ scryfall_id      # e41cf82d-3213-47ce-a015-6e51a8b07e4f
 git clone github.com/pioz/mtgdb
 cd mtgdb
 # go test
-go build -o mtgdb ./bin/main.go
+go build -o mtgdb ./mtgdb-cli/main.go
 ./mtgdb -h
 ```
 
