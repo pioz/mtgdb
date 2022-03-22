@@ -191,7 +191,7 @@ func BulkInsert(db *gorm.DB, cards []Card) error {
 		allSets = append(allSets, *set)
 	}
 
-	scope := db.Clauses(clause.OnConflict{UpdateAll: true}).Session(&gorm.Session{CreateBatchSize: 1000})
+	scope := db.Clauses(clause.OnConflict{UpdateAll: true}).Session(&gorm.Session{CreateBatchSize: 500})
 	err := scope.Create(allSets).Error
 	if err != nil {
 		return err
