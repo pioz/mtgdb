@@ -34,8 +34,8 @@ Before using MTGDB you have to set 2 environment variables (also `.env` file wor
 The first time you run MTGDB, it will migrate also the database creating the tables.
 
 ```
-mtgdb-cli -h
-Usage of mtgdb-cli:
+mtgdb -h
+Usage of mtgdb:
   -download-concurrency int
     	Set max download concurrency
   -en
