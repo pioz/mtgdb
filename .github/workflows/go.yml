@@ -39,4 +39,4 @@ jobs:
         run: DB_CONNECTION="root:root@tcp(127.0.0.1:3306)/mtgdb_test?charset=utf8mb4&parseTime=True" go test
 
       - name: Build mtgdb
-        run: go build -o mtgdb ./mtgdb-cli/main.go
+        run: go build -o mtgdb ./cmd/mtgdb/main.go
