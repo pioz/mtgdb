@@ -279,35 +279,44 @@ type cardJsonStruct struct {
 	NonFoil         bool   `json:"nonfoil"`
 	ReleasedAt      string `json:"released_at"`
 
-	Layout         string                 `json:"layout"`
-	ManaCost       string                 `json:"mana_cost"`
-	CMC            float32                `json:"cmc"`
-	TypeLine       string                 `json:"type_line"`
-	OracleText     string                 `json:"oracle_text"`
-	Power          string                 `json:"power"`
-	Toughness      string                 `json:"toughness"`
-	Colors         []string               `json:"colors"`
-	ColorIdentity  []string               `json:"color_identity"`
-	Keywords       []string               `json:"keywords"`
-	ProducedMana   []string               `json:"produced_mana"`
-	Legalities     map[string]interface{} `json:"legalities"`
-	Games          []string               `json:"games"`
-	Oversized      bool                   `json:"oversized"`
-	Promo          bool                   `json:"promo"`
-	Reprint        bool                   `json:"reprint"`
-	Variation      bool                   `json:"variation"`
-	Digital        bool                   `json:"digital"`
-	Rarity         string                 `json:"rarity"`
-	Watermark      string                 `json:"watermark"`
 	Artist         string                 `json:"artist"`
+	Booster        bool                   `json:"booster"`
 	BorderColor    string                 `json:"border_color"`
+	CMC            float32                `json:"cmc"`
+	ColorIdentity  []string               `json:"color_identity"`
+	ColorIndicator []string               `json:"color_indicator"`
+	Colors         []string               `json:"colors"`
+	ContentWarning bool                   `json:"content_warning"`
+	Digital        bool                   `json:"digital"`
+	Finishes       []string               `json:"finishes"`
+	FlavorName     string                 `json:"flavor_name"`
+	FlavorText     string                 `json:"flavor_text"`
 	Frame          string                 `json:"frame"`
 	FrameEffects   []string               `json:"frame_effects"`
-	SecurityStamp  string                 `json:"security_stamp"`
 	FullArt        bool                   `json:"full_art"`
-	Textless       bool                   `json:"textless"`
-	Booster        bool                   `json:"booster"`
+	Games          []string               `json:"games"`
+	HandModifier   string                 `json:"hand_modifier"`
+	Keywords       []string               `json:"keywords"`
+	Layout         string                 `json:"layout"`
+	Loyalty        string                 `json:"loyalty"`
+	Legalities     map[string]interface{} `json:"legalities"`
+	LifeModifier   string                 `json:"life_modifier"`
+	ManaCost       string                 `json:"mana_cost"`
+	OracleText     string                 `json:"oracle_text"`
+	Oversized      bool                   `json:"oversized"`
+	Power          string                 `json:"power"`
+	ProducedMana   []string               `json:"produced_mana"`
+	Promo          bool                   `json:"promo"`
+	Rarity         string                 `json:"rarity"`
+	Reprint        bool                   `json:"reprint"`
+	Reserved       bool                   `json:"reserved"`
+	SecurityStamp  string                 `json:"security_stamp"`
 	StorySpotlight bool                   `json:"story_spotlight"`
+	Textless       bool                   `json:"textless"`
+	Toughness      string                 `json:"toughness"`
+	TypeLine       string                 `json:"type_line"`
+	Variation      bool                   `json:"variation"`
+	Watermark      string                 `json:"watermark"`
 
 	ScryfallID   string `json:"id"`
 	OracleID     string `json:"oracle_id"`
@@ -342,6 +351,20 @@ func (imagesCardJson *imagesCardJsonStruct) GetImageByTypeName(name string) stri
 type cardFaceStruct struct {
 	PrintedName string               `json:"printed_name"`
 	ImageUris   imagesCardJsonStruct `json:"image_uris"`
+
+	Artist         string   `json:"artist"`
+	CMC            float32  `json:"cmc"`
+	ColorIndicator []string `json:"color_indicator"`
+	Colors         []string `json:"colors"`
+	FlavorText     string   `json:"flavor_text"`
+	Layout         string   `json:"layout"`
+	Loyalty        string   `json:"loyalty"`
+	ManaCost       string   `json:"mana_cost"`
+	OracleText     string   `json:"oracle_text"`
+	Power          string   `json:"power"`
+	Toughness      string   `json:"toughness"`
+	TypeLine       string   `json:"type_line"`
+	Watermark      string   `json:"watermark"`
 }
 
 // PRIVATE functions
@@ -420,35 +443,31 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			HasBackSide:     hasBackSide(cardJson),
 			ReleasedAt:      releasedAt,
 
-			Layout:         cardJson.Layout,
-			ManaCost:       cardJson.ManaCost,
-			CMC:            cardJson.CMC,
-			TypeLine:       cardJson.TypeLine,
-			OracleText:     cardJson.OracleText,
-			Power:          cardJson.Power,
-			Toughness:      cardJson.Toughness,
-			Colors:         cardJson.Colors,
-			ColorIdentity:  cardJson.ColorIdentity,
-			Keywords:       cardJson.Keywords,
-			ProducedMana:   cardJson.ProducedMana,
-			Legalities:     cardJson.Legalities,
-			Games:          cardJson.Games,
-			Oversized:      cardJson.Oversized,
-			Promo:          cardJson.Promo,
-			Reprint:        cardJson.Reprint,
-			Variation:      cardJson.Variation,
-			Digital:        cardJson.Digital,
-			Rarity:         cardJson.Rarity,
-			Watermark:      cardJson.Watermark,
-			Artist:         cardJson.Artist,
+			Booster:        cardJson.Booster,
 			BorderColor:    cardJson.BorderColor,
+			ColorIdentity:  cardJson.ColorIdentity,
+			ContentWarning: cardJson.ContentWarning,
+			Digital:        cardJson.Digital,
+			Finishes:       cardJson.Finishes,
+			FlavorName:     cardJson.FlavorName,
 			Frame:          cardJson.Frame,
 			FrameEffects:   cardJson.FrameEffects,
-			SecurityStamp:  cardJson.SecurityStamp,
 			FullArt:        cardJson.FullArt,
-			Textless:       cardJson.Textless,
-			Booster:        cardJson.Booster,
+			Games:          cardJson.Games,
+			HandModifier:   cardJson.HandModifier,
+			Keywords:       cardJson.Keywords,
+			Legalities:     cardJson.Legalities,
+			LifeModifier:   cardJson.LifeModifier,
+			Oversized:      cardJson.Oversized,
+			ProducedMana:   cardJson.ProducedMana,
+			Promo:          cardJson.Promo,
+			Rarity:         cardJson.Rarity,
+			Reprint:        cardJson.Reprint,
+			Reserved:       cardJson.Reserved,
+			SecurityStamp:  cardJson.SecurityStamp,
 			StorySpotlight: cardJson.StorySpotlight,
+			Textless:       cardJson.Textless,
+			Variation:      cardJson.Variation,
 
 			ScryfallID:   cardJson.ScryfallID,
 			OracleID:     cardJson.OracleID,
@@ -459,6 +478,75 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 
 			Rulings: importer.rulingsCollection[cardJson.OracleID],
 		}
+
+		if len(cardJson.CardFaces) == 2 {
+			card.Artist = cardJson.CardFaces[0].Artist
+			card.ArtistBack = cardJson.CardFaces[1].Artist
+			card.CMC = cardJson.CardFaces[0].CMC
+			card.CMCBack = cardJson.CardFaces[1].CMC
+			card.ColorIndicator = cardJson.CardFaces[0].ColorIndicator
+			card.ColorIndicatorBack = cardJson.CardFaces[1].ColorIndicator
+			card.Colors = cardJson.CardFaces[0].Colors
+			card.ColorsBack = cardJson.CardFaces[1].Colors
+			card.FlavorText = cardJson.CardFaces[0].FlavorText
+			card.FlavorTextBack = cardJson.CardFaces[1].FlavorText
+			card.Layout = cardJson.CardFaces[0].Layout
+			card.LayoutBack = cardJson.CardFaces[1].Layout
+			card.Loyalty = cardJson.CardFaces[0].Loyalty
+			card.LoyaltyBack = cardJson.CardFaces[1].Loyalty
+			card.ManaCost = cardJson.CardFaces[0].ManaCost
+			card.ManaCostBack = cardJson.CardFaces[1].ManaCost
+			card.OracleText = cardJson.CardFaces[0].OracleText
+			card.OracleTextBack = cardJson.CardFaces[1].OracleText
+			card.Power = cardJson.CardFaces[0].Power
+			card.PowerBack = cardJson.CardFaces[1].Power
+			card.Toughness = cardJson.CardFaces[0].Toughness
+			card.ToughnessBack = cardJson.CardFaces[1].Toughness
+			card.TypeLine = cardJson.CardFaces[0].TypeLine
+			card.TypeLineBack = cardJson.CardFaces[1].TypeLine
+			card.Watermark = cardJson.CardFaces[0].Watermark
+			card.WatermarkBack = cardJson.CardFaces[1].Watermark
+		}
+		if card.Artist == "" {
+			card.Artist = cardJson.Artist
+		}
+		if card.CMC == 0 {
+			card.CMC = cardJson.CMC
+		}
+		if card.ColorIndicator == nil {
+			card.ColorIndicator = cardJson.ColorIndicator
+		}
+		if card.Colors == nil {
+			card.Colors = cardJson.Colors
+		}
+		if card.FlavorText == "" {
+			card.FlavorText = cardJson.FlavorText
+		}
+		if card.Layout == "" {
+			card.Layout = cardJson.Layout
+		}
+		if card.Loyalty == "" {
+			card.Loyalty = cardJson.Loyalty
+		}
+		if card.ManaCost == "" {
+			card.ManaCost = cardJson.ManaCost
+		}
+		if card.OracleText == "" {
+			card.OracleText = cardJson.OracleText
+		}
+		if card.Power == "" {
+			card.Power = cardJson.Power
+		}
+		if card.Toughness == "" {
+			card.Toughness = cardJson.Toughness
+		}
+		if card.TypeLine == "" {
+			card.TypeLine = cardJson.TypeLine
+		}
+		if card.Watermark == "" {
+			card.Watermark = cardJson.Watermark
+		}
+
 		importer.cardCollection[key] = card
 		if importer.DownloadAssets {
 			importer.notEnImagesToDownload[key] = cardJson

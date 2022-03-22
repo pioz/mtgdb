@@ -10,8 +10,8 @@ image of each card.
 ## Install
 
 ```
-go install github.com/pioz/mtgdb/mtgdb-cli@latest
-mtgdb-cli -h
+go install github.com/pioz/mtgdb/cmd/mtgdb@latest
+mtgdb -h
 ```
 
 ### From sources
@@ -20,7 +20,7 @@ mtgdb-cli -h
 git clone github.com/pioz/mtgdb
 cd mtgdb
 # go test
-go build -o mtgdb ./mtgdb-cli/main.go
+go build -o mtgdb ./cmd/mtgdb/main.go
 ./mtgdb -h
 ```
 

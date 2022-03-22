@@ -32,35 +32,57 @@ type Card struct {
 	HasBackSide     bool   `gorm:"not null"`
 	ReleasedAt      *time.Time
 
-	Layout         string `gorm:"size:255"`
-	ManaCost       string `gorm:"size:255"`
-	CMC            float32
-	TypeLine       string `gorm:"size:255"`
-	OracleText     string
-	Power          string      `gorm:"size:255"`
-	Toughness      string      `gorm:"size:255"`
-	Colors         SliceString `gorm:"type:json"`
-	ColorIdentity  SliceString `gorm:"type:json"`
-	Keywords       SliceString `gorm:"type:json"`
-	ProducedMana   SliceString `gorm:"type:json"`
-	Legalities     MapString   `gorm:"type:json"`
-	Games          SliceString `gorm:"type:json"`
-	Oversized      bool
-	Promo          bool
-	Reprint        bool
-	Variation      bool
-	Digital        bool
-	Rarity         string      `gorm:"size:255"`
-	Watermark      string      `gorm:"size:255"`
-	Artist         string      `gorm:"size:255"`
-	BorderColor    string      `gorm:"size:255"`
-	Frame          string      `gorm:"size:255"`
-	FrameEffects   SliceString `gorm:"type:json"`
-	SecurityStamp  string      `gorm:"size:255"`
-	FullArt        bool
-	Textless       bool
-	Booster        bool
-	StorySpotlight bool
+	Artist             string `gorm:"size:255"`
+	ArtistBack         string `gorm:"size:255"`
+	Booster            bool
+	BorderColor        string `gorm:"size:255"`
+	CMC                float32
+	CMCBack            float32
+	ColorIdentity      SliceString `gorm:"type:json"`
+	ColorIndicator     SliceString `gorm:"type:json"`
+	ColorIndicatorBack SliceString `gorm:"type:json"`
+	Colors             SliceString `gorm:"type:json"`
+	ColorsBack         SliceString `gorm:"type:json"`
+	ContentWarning     bool
+	Digital            bool
+	Finishes           SliceString `gorm:"type:json"`
+	FlavorName         string      `gorm:"size:255"`
+	FlavorText         string
+	FlavorTextBack     string
+	Frame              string      `gorm:"size:255"`
+	FrameEffects       SliceString `gorm:"type:json"`
+	FullArt            bool
+	Games              SliceString `gorm:"type:json"`
+	HandModifier       string      `gorm:"size:255"`
+	Keywords           SliceString `gorm:"type:json"`
+	Layout             string      `gorm:"size:255"`
+	LayoutBack         string      `gorm:"size:255"`
+	Legalities         MapString   `gorm:"type:json"`
+	LifeModifier       string      `gorm:"size:255"`
+	Loyalty            string      `gorm:"size:255"`
+	LoyaltyBack        string      `gorm:"size:255"`
+	ManaCost           string      `gorm:"size:255"`
+	ManaCostBack       string      `gorm:"size:255"`
+	OracleText         string
+	OracleTextBack     string
+	Oversized          bool
+	Power              string      `gorm:"size:255"`
+	PowerBack          string      `gorm:"size:255"`
+	ProducedMana       SliceString `gorm:"type:json"`
+	Promo              bool
+	Rarity             string `gorm:"size:255"`
+	Reprint            bool
+	Reserved           bool
+	SecurityStamp      string `gorm:"size:255"`
+	StorySpotlight     bool
+	Textless           bool
+	Toughness          string `gorm:"size:255"`
+	ToughnessBack      string `gorm:"size:255"`
+	TypeLine           string `gorm:"size:255"`
+	TypeLineBack       string `gorm:"size:255"`
+	Variation          bool
+	Watermark          string `gorm:"size:255"`
+	WatermarkBack      string `gorm:"size:255"`
 
 	ScryfallID   string `gorm:"size:255;not null"`
 	OracleID     string `gorm:"size:255"`
