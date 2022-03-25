@@ -31,6 +31,8 @@ type Card struct {
 	NonFoil         bool   `gorm:"not null"`
 	HasBackSide     bool   `gorm:"not null"`
 	ReleasedAt      *time.Time
+	FrontImageUrl   string `gorm:"size:255;not null"`
+	BackImageUrl    string `gorm:"size:255"`
 
 	Artist             string `gorm:"size:255"`
 	ArtistBack         string `gorm:"size:255"`

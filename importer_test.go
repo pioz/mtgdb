@@ -83,6 +83,8 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/0/c/0cbf9a94-8d6c-47cd-b660-be6faf51f4c8.jpg?1569990017", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// Extra attributes
 	assert.Equal(t, "David Gaillet", card.Artist)
 	assert.Equal(t, "", card.ArtistBack)
@@ -185,6 +187,8 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-09-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/d/6/d6c65749-1774-4b36-891e-abf762c95cec.jpg?1572489239", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// Extra attributes
 	assert.Equal(t, "Eric Deschamps", card.Artist)
 	assert.Equal(t, "", card.ArtistBack)
@@ -279,6 +283,8 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2017-12-08 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/c/b/cb3587b9-e727-4f37-b4d6-1baa7316262f.jpg?1562937945", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// Extra attributes
 	assert.Equal(t, "Alex Konstad", card.Artist)
 	assert.Equal(t, "", card.ArtistBack)
@@ -373,6 +379,8 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/a/b/abef512f-8f1d-4257-b16f-c0eed58670ec.jpg?1572490758", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// Extra attributes
 	assert.Equal(t, "Eric Deschamps", card.Artist)
 	assert.Equal(t, "", card.ArtistBack)
@@ -470,6 +478,9 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.Foil)
 	assert.False(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/9/a/9a675b33-ab47-4a34-ab10-384e0de2f71f.jpg?1571851323", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// IDs
 	assert.Equal(t, "9a675b33-ab47-4a34-ab10-384e0de2f71f", card.ScryfallID)
 	// Files
@@ -505,6 +516,9 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/7/7/77ba25cb-a8a6-46b6-82be-5c70e663dfdf.jpg?1571886152", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// IDs
 	assert.Equal(t, "77ba25cb-a8a6-46b6-82be-5c70e663dfdf", card.ScryfallID)
 	// Files
@@ -540,6 +554,9 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "2019-05-03 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://c1.scryfall.com/file/scryfall-cards/normal/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// IDs
 	assert.Equal(t, "25d63632-c019-4f34-926a-42f829a4665c", card.ScryfallID)
 	// Files
@@ -578,6 +595,8 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.True(t, card.HasBackSide)
 	assert.Equal(t, "2011-09-30 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/2/5/25b54a1d-e201-453b-9173-b04e06ee6fb7.jpg?1562827580", card.FrontImageUrl)
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/back/2/5/25b54a1d-e201-453b-9173-b04e06ee6fb7.jpg?1562827580", card.BackImageUrl)
 	// Extra attributes
 	assert.Equal(t, "Steve Prescott", card.Artist)
 	assert.Equal(t, "Steve Prescott", card.ArtistBack)
@@ -675,6 +694,9 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.Foil)
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
+	assert.Equal(t, "2019-10-04 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://img.scryfall.com/cards/normal/front/0/d/0dbf3260-b956-40da-abc7-764781c9f26f.jpg?1572392269", card.FrontImageUrl)
+	assert.Equal(t, "", card.BackImageUrl)
 	// IDs
 	assert.Equal(t, "0dbf3260-b956-40da-abc7-764781c9f26f", card.ScryfallID)
 	// Files

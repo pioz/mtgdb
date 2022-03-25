@@ -326,6 +326,17 @@ type cardJsonStruct struct {
 	CardmarketID uint64 `json:"cardmarket_id"`
 }
 
+func (cardJson *cardJsonStruct) getImageUrls(imageTypeName string) []string {
+	images := make([]string, 2)
+	if hasBackSide(cardJson) {
+		images[0] = cardJson.CardFaces[0].ImageUris.GetImageByTypeName(imageTypeName)
+		images[1] = cardJson.CardFaces[1].ImageUris.GetImageByTypeName(imageTypeName)
+	} else {
+		images[0] = cardJson.ImageUris.GetImageByTypeName(imageTypeName)
+	}
+	return images
+}
+
 type imagesCardJsonStruct struct {
 	Png    string `json:"png"`
 	Large  string `json:"large"`
@@ -431,6 +442,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	key := fmt.Sprintf("%s-%s", cardJson.SetCode, cardJson.CollectorNumber)
 	card, found := importer.cardCollection[key]
 	if !found {
+		images := cardJson.getImageUrls(importer.ImageType)
 		releasedAt := parseTime("2006-01-02", cardJson.ReleasedAt)
 		card = &Card{
 			EnName: cardJson.Name,
@@ -442,6 +454,8 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 			NonFoil:         cardJson.NonFoil,
 			HasBackSide:     hasBackSide(cardJson),
 			ReleasedAt:      releasedAt,
+			FrontImageUrl:   images[0],
+			BackImageUrl:    images[1],
 
 			Booster:        cardJson.Booster,
 			BorderColor:    cardJson.BorderColor,
@@ -601,24 +615,16 @@ func (importer *Importer) downloadSetIcon(setJson setJsonStruct) {
 func (importer *Importer) downloadCardImage(cardJson cardJsonStruct, saveAsLang string) {
 	defer pushSemaphoreAndDefer(&importer.wg, importer.downloaderSemaphore)()
 
-	if hasBackSide(&cardJson) {
-		imageUrl := cardJson.CardFaces[0].ImageUris.GetImageByTypeName(importer.ImageType)
-		if imageUrl != "" {
-			filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
-			importer.downloadImage(imageUrl, filePath)
-		}
-		imageUrl = cardJson.CardFaces[1].ImageUris.GetImageByTypeName(importer.ImageType)
-		if imageUrl != "" {
-			filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, true)
-			importer.downloadImage(imageUrl, filePath)
-		}
-	} else {
-		imageUrl := cardJson.ImageUris.GetImageByTypeName(importer.ImageType)
-		if imageUrl != "" {
-			filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
-			importer.downloadImage(imageUrl, filePath)
-		}
+	images := cardJson.getImageUrls(importer.ImageType)
+	if images[0] != "" {
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, false)
+		importer.downloadImage(images[0], filePath)
 	}
+	if images[1] != "" {
+		filePath := CardImagePath(importer.ImagesDir, cardJson.SetCode, cardJson.CollectorNumber, saveAsLang, true)
+		importer.downloadImage(images[1], filePath)
+	}
+
 	if importer.bar != nil {
 		importer.bar.Increment()
 	}
