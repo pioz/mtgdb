@@ -565,7 +565,11 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		if importer.DownloadAssets {
 			importer.notEnImagesToDownload[key] = cardJson
 		}
-	} else if cardJson.Lang == "en" {
+	}
+	if cardJson.Lang == "en" {
+		images := cardJson.getImageUrls(importer.ImageType)
+		card.FrontImageUrl = images[0]
+		card.BackImageUrl = images[1]
 		card.ScryfallID = cardJson.ScryfallID
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
