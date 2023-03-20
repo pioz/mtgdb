@@ -693,7 +693,10 @@ func getResponseHeader(url string) (http.Header, error) {
 		}
 		return nil
 	})
-	return resp.Header, retryErr
+	if retryErr != nil {
+		return nil, retryErr
+	}
+	return resp.Header, nil
 }
 
 func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string) (bool, error) {
