@@ -49,7 +49,7 @@ func main() {
 	flag.BoolVar(&forceDownloadData, "u", false, "Update Scryfall database")
 	flag.BoolVar(&skipDownloadAssets, "skip-assets", false, "Skip download of set and card images")
 	flag.BoolVar(&forceDownloadOlderAssets, "ftime", false, "Force re-download of card images, but only if the modified date is older")
-	flag.BoolVar(&forceDownloadDiffSha1, "fsha1", false, "Force re-download of card images, but only if the sha1sum is changed")
+	// flag.BoolVar(&forceDownloadDiffSha1, "fsha1", false, "Force re-download of card images, but only if the sha1sum is changed")
 	flag.BoolVar(&forceDownloadAssets, "f", false, "Force re-download of card images")
 	flag.BoolVar(&downloadOnlyEnAssets, "en", true, "Download card images only in EN language")
 	flag.IntVar(&downloadConcurrency, "download-concurrency", 0, "Set max download concurrency")
@@ -126,17 +126,19 @@ func main() {
 	db.Model(&mtgdb.Card{}).Count(&afterCardsCount)
 	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImagesCount)
 
-	// Remove deleted cards
-	collectionScryfallIds := make(map[string]struct{})
-	for _, card := range collection {
-		collectionScryfallIds[card.ScryfallID] = struct{}{}
-	}
-	scryfallIdsNotFound := make([]string, 0)
-	for _, scryfallId := range scryfallIds {
-		if _, found := collectionScryfallIds[scryfallId]; !found && scryfallId != "" {
-			scryfallIdsNotFound = append(scryfallIdsNotFound, scryfallId)
+	// Remove deleted cards ONLY if no filter on sets
+	if len(sets) == 0 {
+		collectionScryfallIds := make(map[string]struct{})
+		for _, card := range collection {
+			collectionScryfallIds[card.ScryfallID] = struct{}{}
 		}
+		scryfallIdsNotFound := make([]string, 0)
+		for _, scryfallId := range scryfallIds {
+			if _, found := collectionScryfallIds[scryfallId]; !found && scryfallId != "" {
+				scryfallIdsNotFound = append(scryfallIdsNotFound, scryfallId)
+			}
+		}
+		db.Where("scryfall_id IN (?)", scryfallIdsNotFound).Delete(mtgdb.Card{})
+		log.Printf("Deleted %d cards\n", len(scryfallIdsNotFound))
 	}
-	db.Where("scryfall_id IN (?)", scryfallIdsNotFound).Delete(mtgdb.Card{})
-	log.Printf("Deleted %d cards\n", len(scryfallIdsNotFound))
 }
