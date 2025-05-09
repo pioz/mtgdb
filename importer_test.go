@@ -42,17 +42,15 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 		return collection[i].ScryfallID > collection[j].ScryfallID
 	})
 
-	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/sets/eld.jpg"))
-	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/isd.jpg"))
-	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/ust.jpg"))
-	assert.False(t, os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/sets/war.jpg"))
-	assert.False(t, os.IsNotExist(err))
+	// Check that all icon sets have been downloaded
+	for i := 0; i < len(collection); i++ {
+		setIconPath := filepath.Join(importer.ImagesDir, "/sets/"+collection[i].Set.IconName+".jpg")
+		_, err := os.Stat(setIconPath)
+		assert.False(t, os.IsNotExist(err))
+	}
 
-	assert.Equal(t, 9, len(collection))
-	assert.Equal(t, uint32(42), downloadedImagesCount)
+	assert.Equal(t, 10, len(collection))
+	assert.Equal(t, uint32(44), downloadedImagesCount)
 
 	// Acclaimed Contender
 	///////////////////////
@@ -152,15 +150,55 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.Equal(t, "2019-10-04 00:00:00", card.Rulings[1].PublishedAt.Format("2006-01-02 15:04:05"))
 	// Files
 	for _, lang := range []string{"en", "de", "es", "fr", "it", "ja", "ko", "pt", "ru", "zhs", "zht"} {
-		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
+		_, err := os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s.jpg", lang)))
 		assert.False(t, os.IsNotExist(err))
 		_, err = os.Stat(filepath.Join(importer.ImagesDir, fmt.Sprintf("/cards/eld/eld_1_%s_back.jpg", lang)))
 		assert.True(t, os.IsNotExist(err))
 	}
 
+	// Birds of Paradise
+	/////////////////////
+	card = collection[1]
+	// Names
+	assert.Equal(t, "Birds of Paradise", card.EnName)
+	assert.Equal(t, "", card.EsName)
+	assert.Equal(t, "", card.FrName)
+	assert.Equal(t, "", card.DeName)
+	assert.Equal(t, "", card.ItName)
+	assert.Equal(t, "", card.PtName)
+	assert.Equal(t, "", card.JaName)
+	assert.Equal(t, "", card.KoName)
+	assert.Equal(t, "", card.RuName)
+	assert.Equal(t, "", card.ZhsName)
+	assert.Equal(t, "", card.ZhtName)
+	// Set
+	assert.Equal(t, "sld", card.SetCode)
+	assert.Equal(t, "sld", card.Set.Code)
+	assert.Equal(t, "sld", card.Set.ParentCode)
+	assert.Equal(t, "Secret Lair Drop", card.Set.Name)
+	assert.Equal(t, "2019-12-02 00:00:00 +0000 UTC", card.Set.ReleasedAt.String())
+	assert.Equal(t, "box", card.Set.Typology)
+	assert.Equal(t, "star", card.Set.IconName)
+	// Core attributes
+	assert.Equal(t, "1675", card.CollectorNumber)
+	assert.True(t, card.Foil)
+	assert.True(t, card.NonFoil)
+	assert.True(t, card.HasBackSide)
+	assert.Equal(t, "2024-07-29 00:00:00 +0000 UTC", card.ReleasedAt.String())
+	assert.Equal(t, "https://cards.scryfall.io/normal/front/d/a/dae8751c-4c72-4034-a192-a1e166f20246.jpg?1733255382", card.FrontImageUrl)
+	assert.Equal(t, "https://cards.scryfall.io/normal/back/d/a/dae8751c-4c72-4034-a192-a1e166f20246.jpg?1733255382", card.BackImageUrl)
+	// IDs
+	assert.Equal(t, "dae8751c-4c72-4034-a192-a1e166f20246", card.ScryfallID)
+	// Files
+	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en.jpg"))
+	assert.False(t, os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(importer.ImagesDir, "/cards/eld/eld_334_en_back.jpg"))
+	assert.True(t, os.IsNotExist(err))
+	// TODO other fields
+
 	// Garruk, Cursed Huntsman Emblem
 	//////////////////////////////////
-	card = collection[1]
+	card = collection[2]
 	// Names
 	assert.Equal(t, "Garruk, Cursed Huntsman Emblem", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -256,7 +294,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Rumors of My Death
 	//////////////////////
-	card = collection[2]
+	card = collection[3]
 	// Names
 	assert.Equal(t, "\"Rumors of My Death . . .\"", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -352,7 +390,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Garruk, Cursed Huntsman
 	///////////////////////////
-	card = collection[3]
+	card = collection[4]
 	// Names
 	assert.Equal(t, "Garruk, Cursed Huntsman", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -452,7 +490,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Acclaimed Contender
 	///////////////////////
-	card = collection[4]
+	card = collection[5]
 	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -490,7 +528,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Acclaimed Contender
 	///////////////////////
-	card = collection[5]
+	card = collection[6]
 	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -528,7 +566,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Nissa, Who Shakes the World
 	///////////////////////////////
-	card = collection[6]
+	card = collection[7]
 	// Names
 	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -568,7 +606,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Daybreak Ranger // Nightfall Predator
 	/////////////////////////////////////////
-	card = collection[7]
+	card = collection[8]
 	// Names
 	assert.Equal(t, "Daybreak Ranger // Nightfall Predator", card.EnName)
 	assert.Equal(t, "Guardabosque del amanecer // Depredadora del anochecer", card.EsName)
@@ -668,7 +706,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 
 	// Acclaimed Contender
 	///////////////////////
-	card = collection[8]
+	card = collection[9]
 	// Names
 	assert.Equal(t, "Acclaimed Contender", card.EnName)
 	assert.Equal(t, "", card.EsName)
@@ -717,9 +755,9 @@ func TestImporterBuildCardsFromJsonDownloadOnlyEnAssets(t *testing.T) {
 		return collection[i].ScryfallID > collection[j].ScryfallID
 	})
 
-	assert.Equal(t, uint32(11), downloadedImagesCount)
-	// Index 6 is Nissa Japan
-	card := collection[6]
+	assert.Equal(t, uint32(13), downloadedImagesCount)
+	// Index 7 is Nissa Japan
+	card := collection[7]
 	assert.Equal(t, "Nissa, Who Shakes the World", card.EnName)
 	assert.Equal(t, "世界を揺るがす者、ニッサ", card.JaName)
 	_, err := os.Stat(filepath.Join(importer.ImagesDir, "/cards/war/war_169★_en.jpg"))

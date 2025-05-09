@@ -444,8 +444,9 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 	if !found {
 		images := cardJson.getImageUrls(importer.ImageType)
 		releasedAt := parseTime("2006-01-02", cardJson.ReleasedAt)
+		cardName := doubleSideCardWithSameName(cardJson.Name)
 		card = &Card{
-			EnName: cardJson.Name,
+			EnName: cardName,
 
 			SetCode:         cardJson.SetCode,
 			Set:             importer.setCollection[cardJson.SetCode],
@@ -822,6 +823,14 @@ func contains(collection []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func doubleSideCardWithSameName(s string) string {
+	parts := strings.Split(s, " // ")
+	if len(parts) != 2 || parts[0] != parts[1] {
+		return s
+	}
+	return parts[0]
 }
 
 func removeAllFilesByExtension(dirPath, ext string) {

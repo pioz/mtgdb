@@ -44,6 +44,7 @@ func TestJsonStreamerArray(t *testing.T) {
 		"Daybreak Ranger // Nightfall Predator",
 		"Garruk, Cursed Huntsman",
 		"Nissa, Who Shakes the World",
+		"Birds of Paradise // Birds of Paradise",
 	}
 	streamer, _ := mtgdb.NewJsonStreamer(filepath.Join("./testdata", "data", "all_cards.json"))
 	var cardJson cardJsonStruct
