@@ -127,7 +127,7 @@ func main() {
 	log.Printf("Imported %d new sets and %d new cards (%d images updated)\n", afterSetsCount-beforeSetsCount, afterCardsCount-beforeCardsCount, downloadedImagesCount)
 
 	// Remove deleted cards ONLY if no filter on sets
-	if len(sets) == 0 {
+	if setsString == "" {
 		collectionScryfallIds := make(map[string]struct{})
 		for _, card := range collection {
 			collectionScryfallIds[card.ScryfallID] = struct{}{}
