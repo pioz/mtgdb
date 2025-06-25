@@ -31,6 +31,10 @@ func createCustomItems(db *gorm.DB) error {
 
 	cards := []mtgdb.Card{
 		{EnName: "Back", SetCode: "extra", CollectorNumber: "001", Foil: false, NonFoil: true, HasBackSide: false, ReleasedAt: &releasedAt},
+		{EnName: "Back", SetCode: "extra", CollectorNumber: "002", Foil: false, NonFoil: true, HasBackSide: false, ReleasedAt: &releasedAt},
+		{EnName: "Back", SetCode: "extra", CollectorNumber: "003", Foil: false, NonFoil: true, HasBackSide: false, ReleasedAt: &releasedAt},
+		{EnName: "Back", SetCode: "extra", CollectorNumber: "004", Foil: false, NonFoil: true, HasBackSide: false, ReleasedAt: &releasedAt},
+		{EnName: "Back", SetCode: "extra", CollectorNumber: "005", Foil: false, NonFoil: true, HasBackSide: false, ReleasedAt: &releasedAt},
 	}
 	return scope.Omit("Set").Create(&cards).Error
 }
