@@ -775,9 +775,9 @@ func TestBulkInsert(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	db.Config.Logger = db.Config.Logger.LogMode(logger.Error)
+	db.Logger = db.Logger.LogMode(logger.Error)
 	if os.Getenv("DB_LOG") == "1" {
-		db.Config.Logger = db.Config.Logger.LogMode(logger.Info)
+		db.Logger = db.Logger.LogMode(logger.Info)
 	}
 	mtgdb.AutoMigrate(db)
 

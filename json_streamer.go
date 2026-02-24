@@ -30,7 +30,7 @@ func NewJsonStreamer(filepath string) (*JsonStreamer, error) {
 }
 
 func (streamer *JsonStreamer) Next() bool {
-	more := streamer.Decoder.More()
+	more := streamer.More()
 	if !more {
 		_, err := streamer.Token()
 		if err != nil {
