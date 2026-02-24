@@ -381,7 +381,7 @@ type cardFaceStruct struct {
 // PRIVATE functions
 
 func fetchAllCardsDataUrl() (map[string]string, error) {
-	resp, err := http.Get("https://api.scryfall.com/bulk-data")
+	resp, err := httpRequest(http.MethodGet, "https://api.scryfall.com/bulk-data")
 	if err != nil {
 		return nil, err
 	}
@@ -685,7 +685,7 @@ func getResponseHeader(url string) (http.Header, error) {
 		err  error
 	)
 	retryErr := retryOnError(3, 100*time.Millisecond, func() error {
-		resp, err = http.Head(url)
+		resp, err = httpRequest(http.MethodHead, url)
 		if err != nil {
 			return err
 		}
@@ -725,7 +725,7 @@ func downloadFileWhenChanged(filepath, url string, stat os.FileInfo, sha1 string
 
 func downloadFile(filepath, url string) error {
 	return retryOnError(3, 100*time.Millisecond, func() error {
-		resp, err := http.Get(url)
+		resp, err := httpRequest(http.MethodGet, url)
 		if err != nil {
 			return err
 		}
@@ -777,6 +777,16 @@ func sha1sum(filepath string) string {
 		return ""
 	}
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func httpRequest(method, url string) (*http.Response, error) {
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "application/json")
+	return http.DefaultClient.Do(req)
 }
 
 func httpError(url string, statusCode int) error {
