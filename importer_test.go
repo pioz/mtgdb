@@ -25,7 +25,7 @@ const TEMP_DIR = "/tmp/mtgdb_test"
 // 	importer.DownloadData()
 // 	_, err := os.Stat(filepath.Join(TEMP_DIR, "all_sets.json"))
 // 	assert.False(t, os.IsNotExist(err))
-// 	_, err = os.Stat(filepath.Join(TEMP_DIR, "all_cards.json"))
+// 	_, err = os.Stat(filepath.Join(TEMP_DIR, "all_cards.jsonl"))
 // 	assert.False(t, os.IsNotExist(err))
 // }
 
@@ -593,7 +593,7 @@ func TestImporterBuildCardsFromJson(t *testing.T) {
 	assert.True(t, card.NonFoil)
 	assert.False(t, card.HasBackSide)
 	assert.Equal(t, "2019-05-03 00:00:00 +0000 UTC", card.ReleasedAt.String())
-	assert.Equal(t, "https://c1.scryfall.com/file/scryfall-cards/normal/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714", card.FrontImageUrl)
+	assert.Equal(t, "https://cards.scryfall.io/normal/front/2/5/25d63632-c019-4f34-926a-42f829a4665c.jpg?1580443714", card.FrontImageUrl)
 	assert.Equal(t, "", card.BackImageUrl)
 	// IDs
 	assert.Equal(t, "25d63632-c019-4f34-926a-42f829a4665c", card.ScryfallID)
