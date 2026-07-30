@@ -65,33 +65,31 @@ func TestJsonStreamerJsonl(t *testing.T) {
 	assert.Equal(t, len(expectedCardNames), i)
 }
 
-func TestJsonStreamerArray(t *testing.T) {
-	names := []string{"Acclaimed Contender", "Garruk, Cursed Huntsman", "Daybreak Ranger // Nightfall Predator"}
-	arrayFilePath := filepath.Join(t.TempDir(), "cards.json")
-	err := os.WriteFile(arrayFilePath, []byte(`[
-		{"name": "Acclaimed Contender"},
-		{"name": "Garruk, Cursed Huntsman"},
-		{"name": "Daybreak Ranger // Nightfall Predator"}
-	]`), 0644)
+func TestJsonStreamerArraysPerLine(t *testing.T) {
+	arraysFilePath := filepath.Join(t.TempDir(), "cards.jsonl")
+	err := os.WriteFile(arraysFilePath, []byte(`[{"name": "Acclaimed Contender"}, {"name": "Garruk, Cursed Huntsman"}]
+[{"name": "Daybreak Ranger // Nightfall Predator"}]
+`), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	streamer, err := mtgdb.NewJsonStreamer(arrayFilePath)
+	streamer, err := mtgdb.NewJsonStreamer(arraysFilePath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var cardJson cardJsonStruct
-	i := 0
+	arrays := make([][]cardJsonStruct, 0)
 	for streamer.Next() {
-		err := streamer.Get(&cardJson)
+		var cardsJson []cardJsonStruct
+		err := streamer.Get(&cardsJson)
 		if err != nil {
 			t.Fatal(err)
 		}
-		assert.Equal(t, names[i], cardJson.Name, i)
-		i++
+		arrays = append(arrays, cardsJson)
 	}
-	assert.Equal(t, len(names), i)
+	assert.Equal(t, 2, len(arrays))
+	assert.Equal(t, []cardJsonStruct{{Name: "Acclaimed Contender"}, {Name: "Garruk, Cursed Huntsman"}}, arrays[0])
+	assert.Equal(t, []cardJsonStruct{{Name: "Daybreak Ranger // Nightfall Predator"}}, arrays[1])
 }
 
 func TestJsonStreamerObject(t *testing.T) {
