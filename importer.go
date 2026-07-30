@@ -2,6 +2,7 @@ package mtgdb
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -75,8 +76,8 @@ func (importer *Importer) DownloadData() error {
 	createDirIfNotExist(importer.DataDir)
 
 	allSetsJsonFilePath := filepath.Join(importer.DataDir, "all_sets.json")
-	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.json")
-	rulingsJsonFilePath := filepath.Join(importer.DataDir, "rulings.json")
+	allCardsJsonFilePath := filepath.Join(importer.DataDir, "all_cards.jsonl")
+	rulingsJsonFilePath := filepath.Join(importer.DataDir, "rulings.jsonl")
 	if _, err := os.Stat(allSetsJsonFilePath); importer.ForceDownloadData || os.IsNotExist(err) {
 		err := downloadFile(allSetsJsonFilePath, "https://api.scryfall.com/sets")
 		if err != nil {
@@ -88,11 +89,11 @@ func (importer *Importer) DownloadData() error {
 		if err != nil {
 			return err
 		}
-		err = downloadFile(allCardsJsonFilePath, urls["all_cards"])
+		err = downloadGzipFile(allCardsJsonFilePath, urls["all_cards"])
 		if err != nil {
 			return err
 		}
-		err = downloadFile(rulingsJsonFilePath, urls["rulings"])
+		err = downloadGzipFile(rulingsJsonFilePath, urls["rulings"])
 		if err != nil {
 			return err
 		}
@@ -114,12 +115,16 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	}
 
 	// Fill importer.rulingsCollection
-	rulingsJson := make([]rulingsJsonStruct, 0)
-	err := loadFile(filepath.Join(importer.DataDir, "rulings.json"), &rulingsJson)
+	rulingsStreamer, err := NewJsonStreamer(filepath.Join(importer.DataDir, "rulings.jsonl"))
 	if err != nil {
 		panic(err)
 	}
-	for _, rulingJson := range rulingsJson {
+	for rulingsStreamer.Next() {
+		var rulingJson rulingsJsonStruct
+		err := rulingsStreamer.Get(&rulingJson)
+		if err != nil {
+			panic(err)
+		}
 		importer.buildRuling(&rulingJson)
 	}
 
@@ -141,7 +146,7 @@ func (importer *Importer) BuildCardsFromJson() ([]Card, uint32) {
 	}
 
 	// Fill importer.cardCollection
-	streamer, err := NewJsonStreamer(filepath.Join(importer.DataDir, "all_cards.json"))
+	streamer, err := NewJsonStreamer(filepath.Join(importer.DataDir, "all_cards.jsonl"))
 	if err != nil {
 		panic(err)
 	}
@@ -223,8 +228,8 @@ func FillMissingTranslations(db *gorm.DB) error {
 // PRIVATE types
 
 type bulkDataJsonStruct struct {
-	Type        string `json:"type"`
-	DownloadUri string `json:"download_uri"`
+	Type             string `json:"type"`
+	JsonlDownloadUri string `json:"jsonl_download_uri"`
 }
 
 type bulkDataArrayJsonStruct struct {
@@ -397,7 +402,7 @@ func fetchAllCardsDataUrl() (map[string]string, error) {
 	}
 	urls := make(map[string]string)
 	for _, bulkData := range bulkDataArray.Data {
-		urls[bulkData.Type] = bulkData.DownloadUri
+		urls[bulkData.Type] = bulkData.JsonlDownloadUri
 	}
 	return urls, nil
 }
@@ -741,6 +746,36 @@ func downloadFile(filepath, url string) error {
 		defer file.Close()
 
 		_, err = io.Copy(file, resp.Body)
+		return err
+	})
+}
+
+// downloadGzipFile downloads a gzip compressed file (like the Scryfall bulk
+// data .jsonl.gz files) and saves it decompressed.
+func downloadGzipFile(filepath, url string) error {
+	return retryOnError(3, 100*time.Millisecond, func() error {
+		resp, err := httpRequest(http.MethodGet, url)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			return httpError(url, resp.StatusCode)
+		}
+
+		gzipReader, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return err
+		}
+		defer gzipReader.Close()
+
+		file, err := os.Create(filepath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		_, err = io.Copy(file, gzipReader)
 		return err
 	})
 }
