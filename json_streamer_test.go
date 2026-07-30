@@ -1,6 +1,7 @@
 package mtgdb_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -65,7 +66,18 @@ func TestJsonStreamerJsonl(t *testing.T) {
 }
 
 func TestJsonStreamerArray(t *testing.T) {
-	streamer, err := mtgdb.NewJsonStreamer(filepath.Join("./testdata", "data", "all_cards.json"))
+	names := []string{"Acclaimed Contender", "Garruk, Cursed Huntsman", "Daybreak Ranger // Nightfall Predator"}
+	arrayFilePath := filepath.Join(t.TempDir(), "cards.json")
+	err := os.WriteFile(arrayFilePath, []byte(`[
+		{"name": "Acclaimed Contender"},
+		{"name": "Garruk, Cursed Huntsman"},
+		{"name": "Daybreak Ranger // Nightfall Predator"}
+	]`), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	streamer, err := mtgdb.NewJsonStreamer(arrayFilePath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,10 +88,10 @@ func TestJsonStreamerArray(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		assert.Equal(t, expectedCardNames[i], cardJson.Name, i)
+		assert.Equal(t, names[i], cardJson.Name, i)
 		i++
 	}
-	assert.Equal(t, len(expectedCardNames), i)
+	assert.Equal(t, len(names), i)
 }
 
 func TestJsonStreamerObject(t *testing.T) {
