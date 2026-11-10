@@ -576,6 +576,7 @@ func (importer *Importer) buildCard(cardJson *cardJsonStruct) {
 		images := cardJson.getImageUrls(importer.ImageType)
 		card.FrontImageUrl = images[0]
 		card.BackImageUrl = images[1]
+		card.HasBackSide = hasBackSide(cardJson)
 		card.ScryfallID = cardJson.ScryfallID
 	}
 	if importer.DownloadAssets && (!importer.DownloadOnlyEnAssets || cardJson.Lang == "en") {
